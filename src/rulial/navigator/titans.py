@@ -140,9 +140,9 @@ class TitansNavigator:
         # Hypothesis: Class 4 "Life" lives on the Edge of Chaos.
         # Max Entropy (1.0) is Chaos/Volume Law.
         # Zero Entropy (0.0) is Ice/Area Law (Trivial).
-        # We want "Complex Area Law" ~ 0.5 - 0.9 (depending on normalization).
-        # Let's target 0.95 (Superfluid Sweet Spot).
-        TARGET = 0.95
+        # We want "Complex Area Law" ~ 0.5 - 0.9.
+        # User Selection: The Golden Ratio (Phi - 1)
+        TARGET = 0.618
 
         # distance = abs(pred - TARGET)
         distances = np.abs(predicted_entropies - TARGET)
