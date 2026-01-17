@@ -39,6 +39,47 @@ class Totalistic2DEngine:
         # Standard Golly is B.../S...
         return born, survive
 
+    def init_grid(
+        self,
+        height: int,
+        width: int,
+        init_condition: str = "random",
+        density: float = 0.5,
+        custom_grid: np.ndarray = None,
+    ) -> np.ndarray:
+        """Initialize the grid."""
+        if init_condition == "custom" and custom_grid is not None:
+            grid = custom_grid.copy()
+        elif init_condition == "random":
+            grid = (np.random.random((height, width)) < density).astype(np.uint8)
+        else:
+            grid = np.zeros((height, width), dtype=np.uint8)
+            # Center dot
+            grid[height // 2, width // 2] = 1
+        return grid
+
+    def step(self, grid: np.ndarray) -> np.ndarray:
+        """Advance the grid by one step."""
+        # 1. Count neighbors via convolution
+        # boundaries='wrap' for toroidal universe (standard for finite CA)
+        neighbors = convolve2d(grid, self.kernel, mode="same", boundary="wrap")
+
+        # 2. Apply Rule
+        # Born: Cell is 0 and neighbors in B set
+        # Survive: Cell is 1 and neighbors in S set
+        # Dies: Otherwise
+
+        # Vectorized rule application
+        is_alive = grid == 1
+        is_dead = grid == 0
+
+        # Create masks
+        born_mask = np.isin(neighbors, list(self.born)) & is_dead
+        survive_mask = np.isin(neighbors, list(self.survive)) & is_alive
+
+        next_grid = (born_mask | survive_mask).astype(np.uint8)
+        return next_grid
+
     def simulate(
         self,
         height: int,
@@ -52,14 +93,7 @@ class Totalistic2DEngine:
         Simulate the CA.
         Returns: (steps, height, width) tensor.
         """
-        if init_condition == "custom" and custom_grid is not None:
-            grid = custom_grid.copy()
-        elif init_condition == "random":
-            grid = (np.random.random((height, width)) < density).astype(np.uint8)
-        else:
-            grid = np.zeros((height, width), dtype=np.uint8)
-            # Center dot
-            grid[height // 2, width // 2] = 1
+        grid = self.init_grid(height, width, init_condition, density, custom_grid)
 
         history = np.zeros((steps, height, width), dtype=np.uint8)
         history[0] = grid
@@ -67,27 +101,7 @@ class Totalistic2DEngine:
         current_grid = grid
 
         for t in range(1, steps):
-            # 1. Count neighbors via convolution
-            # boundaries='wrap' for toroidal universe (standard for finite CA)
-            neighbors = convolve2d(
-                current_grid, self.kernel, mode="same", boundary="wrap"
-            )
-
-            # 2. Apply Rule
-            # Born: Cell is 0 and neighbors in B set
-            # Survive: Cell is 1 and neighbors in S set
-            # Dies: Otherwise
-
-            # Vectorized rule application
-            is_alive = current_grid == 1
-            is_dead = current_grid == 0
-
-            # Create masks
-            born_mask = np.isin(neighbors, list(self.born)) & is_dead
-            survive_mask = np.isin(neighbors, list(self.survive)) & is_alive
-
-            next_grid = (born_mask | survive_mask).astype(np.uint8)
-
+            next_grid = self.step(current_grid)
             history[t] = next_grid
             current_grid = next_grid
 

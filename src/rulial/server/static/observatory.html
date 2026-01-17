@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Rulial Observatory 🔭</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: #000;
+        color: #0f0;
+        font-family: monospace;
+      }
+      #ui {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 10;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        border: 1px solid #0f0;
+      }
+      input {
+        background: #111;
+        border: 1px solid #0f0;
+        color: #0f0;
+        padding: 5px;
+      }
+      button {
+        background: #0f0;
+        color: #000;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      button:hover {
+        background: #fff;
+      }
+    </style>
+    <!-- Load Three.js from CDN -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="ui">
+      <h2>Rulial Observatory</h2>
+      <div>
+        <input
+          type="text"
+          id="ruleInput"
+          value="B45/S236"
+          placeholder="Rule (e.g. B3/S23)"
+        />
+        <button id="connectBtn">CONNECT BEAM</button>
+      </div>
+      <div id="status">Status: Offline</div>
+      <div id="stats">FPS: 0 | Voxels: 0</div>
+    </div>
+
+    <script type="module">
+      import * as THREE from "three";
+      import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+      // Config
+      const GRID_SIZE = 64;
+      const MAX_HISTORY = 200; // How many frames to keep in 3D buffer
+
+      let scene, camera, renderer, controls;
+      let particleSystem;
+      let positions = []; // Flat array of [x, y, z]
+      let socket;
+
+      // State
+      let universeHistory = []; // Array of Uint8Arrays (frames)
+      let frameCount = 0;
+
+      init();
+      animate();
+
+      function init() {
+        // Scene
+        scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000000, 0.002);
+
+        // Camera
+        camera = new THREE.PerspectiveCamera(
+          75,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          1000,
+        );
+        camera.position.set(30, 30, 60);
+
+        // Renderer
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Controls
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.5;
+
+        // Geom
+        // We use a Point Cloud for Voxels (Performance)
+        const geometry = new THREE.BufferGeometry();
+        // Initial buffer size (MAX_HISTORY * GRID_SIZE^2 is upper bound)
+        const maxPoints = MAX_HISTORY * GRID_SIZE * GRID_SIZE;
+        const posArray = new Float32Array(maxPoints * 3);
+        geometry.setAttribute(
+          "position",
+          new THREE.BufferAttribute(posArray, 3),
+        );
+
+        // Material
+        const material = new THREE.PointsMaterial({
+          color: 0x00ff88,
+          size: 0.6,
+          transparent: true,
+          opacity: 0.8,
+          blending: THREE.AdditiveBlending,
+        });
+
+        particleSystem = new THREE.Points(geometry, material);
+        scene.add(particleSystem);
+
+        // Helpers
+        const axesHelper = new THREE.AxesHelper(10);
+        scene.add(axesHelper);
+
+        const gridHelper = new THREE.GridHelper(
+          GRID_SIZE,
+          10,
+          0x444444,
+          0x111111,
+        );
+        gridHelper.position.set(
+          GRID_SIZE / 2 - 0.5,
+          -MAX_HISTORY / 2,
+          GRID_SIZE / 2 - 0.5,
+        ); // Center vaguely
+        scene.add(gridHelper);
+
+        // Events
+        window.addEventListener("resize", onWindowResize);
+        document
+          .getElementById("connectBtn")
+          .addEventListener("click", connect);
+      }
+
+      function connect() {
+        const rule = document.getElementById("ruleInput").value;
+        const status = document.getElementById("status");
+
+        if (socket) socket.close();
+
+        status.textContent = `Connecting to ${rule}...`;
+        status.style.color = "yellow";
+
+        // Clear history
+        universeHistory = [];
+
+        // WS
+        const proto = window.location.protocol === "https:" ? "wss" : "ws";
+        const url = `${proto}://${window.location.host}/stream/${encodeURIComponent(rule)}`;
+
+        socket = new WebSocket(url);
+        socket.binaryType = "arraybuffer";
+
+        socket.onopen = () => {
+          status.textContent = "CONNECTED: STREAMING DATA";
+          status.style.color = "#0f0";
+        };
+
+        socket.onmessage = (event) => {
+          // Incoming binary frame (64x64 bytes)
+          const frame = new Uint8Array(event.data);
+
+          // Add to history
+          universeHistory.push(frame);
+          if (universeHistory.length > MAX_HISTORY) {
+            universeHistory.shift(); // Remove oldest
+          }
+
+          updateVoxels();
+          frameCount++;
+        };
+
+        socket.onclose = (e) => {
+          status.textContent = `DISCONNECTED (${e.code})`;
+          status.style.color = "red";
+        };
+      }
+
+      function updateVoxels() {
+        // Rebuild particle buffer from history
+        // Z axis = Time
+
+        const positions = particleSystem.geometry.attributes.position.array;
+        let ptr = 0;
+
+        // Render oldest at Z=0 (bottom) to newest at Z=MAX_HISTORY (top)
+        // Or center it. Let's make Z=0 be 'Now' and history goes down?
+        // Actually, let's stack them up.
+
+        // universeHistory[0] is oldest.
+
+        const zOffset = -universeHistory.length / 2;
+
+        for (let t = 0; t < universeHistory.length; t++) {
+          const grid = universeHistory[t];
+          // Grid is 64x64 flattened
+          for (let i = 0; i < grid.length; i++) {
+            if (grid[i] === 1) {
+              // Alive
+              const y = Math.floor(i / GRID_SIZE);
+              const x = i % GRID_SIZE;
+
+              positions[ptr++] = x;
+              positions[ptr++] = t + zOffset; // Time is the vertical axis here? usually Y in ThreeJS?
+              // Let's map:
+              // X = x, Y = time (t), Z = y (row)
+              // Actually standard is Y up. So Time = Y.
+              positions[ptr++] = y;
+            }
+          }
+        }
+
+        particleSystem.geometry.setDrawRange(0, ptr / 3);
+        particleSystem.geometry.attributes.position.needsUpdate = true;
+
+        document.getElementById("stats").textContent =
+          `Frames: ${frameCount} | Voxels: ${ptr / 3}`;
+      }
+
+      function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+    </script>
+  </body>
+</html>

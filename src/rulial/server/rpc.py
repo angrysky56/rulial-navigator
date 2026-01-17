@@ -1,18 +1,60 @@
+import asyncio
+import os
+
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
+from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from ..compression.metrics import TelemetryAnalyzer
 
 # Import our components
 from ..engine.eca import ECAEngine
+from ..engine.totalistic import Totalistic2DEngine
 from ..mapper.atlas import Atlas
 from ..mapper.topology import TopologyMapper
 from ..navigator.annealing import AnnealingController
 from ..navigator.classifier import RuleClassifier
 from ..quantum.superfluid import SuperfluidFilter
 
+
+def int_to_rule_str(n: int) -> str:
+    # Logic matched to src/rulial/runners/probe_2d.py (Lines 69-76)
+    bin_str = format(int(n), "018b")
+
+    # In probe_2d.py:
+    # int_to_bits(n, 18) -> creates np.array from bin_str
+    # rule_bits[0:9] -> First 9 bits -> Used for BORN
+    # rule_bits[9:18] -> Last 9 bits -> Used for SURVIVE
+
+    # Example: n=1 => 00...001
+    # bin_str = "000000000000000001"
+    # B = [0..8] = 000000000 -> No Births
+    # S = [9..17] = 000000001 -> Survive 8 (index 8 of slice, which is index 17 of full)
+    # Wait, enumerate(rule_bits[9:18]):
+    # If S = [0,0,0,0,0,0,0,0,1], then '1' is at index 8.
+    # So b=1 at index 8 of the chunk.
+    # So it means S8.
+
+    # Let's map it:
+    b_bits = bin_str[0:9]
+    s_bits = bin_str[9:18]
+
+    born = [i for i, bit in enumerate(b_bits) if bit == "1"]
+    survive = [i for i, bit in enumerate(s_bits) if bit == "1"]
+
+    return f"B{''.join(map(str, born))}/S{''.join(map(str, survive))}"
+
+
 app = FastAPI(title="Rulial Navigator RPC")
+
+# Serve static files (for observatory.html)
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+if not os.path.exists(static_dir):
+    os.makedirs(static_dir)
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
 
 # State
 atlas = Atlas()
@@ -20,6 +62,11 @@ annealing = AnnealingController()
 topology_mapper = TopologyMapper()
 telemetry_analyzer = TelemetryAnalyzer()
 superfluid = SuperfluidFilter()
+
+
+@app.get("/")
+async def root():
+    return RedirectResponse(url="/static/observatory.html")
 
 
 # Models
@@ -79,6 +126,53 @@ async def probe_rule(req: ProbeRequest):
         superfluid_entropy=sf_data.get("normalized_entropy", 0.0),
         classification=sf_data.get("classification", "unknown"),
     )
+
+
+@app.websocket("/stream/{rule_str}")
+async def websocket_stream(websocket: WebSocket, rule_str: str):
+    """
+    Stream a 2D Totalistic Universe over WebSocket.
+    """
+    await websocket.accept()
+
+    # 1. Init Engine
+    try:
+        # Check if integer
+        if rule_str.isdigit():
+            rule_str = int_to_rule_str(int(rule_str))
+
+        engine = Totalistic2DEngine(rule_str)
+    except Exception as e:
+        await websocket.close(code=1000, reason=f"Invalid Rule: {e}")
+        return
+
+    # 2. Config
+    height = 64
+    width = 64
+
+    # 3. Simulation Loop
+    # We yield frames one by one
+    # Initial state
+    grid = engine.init_grid(height, width, "random")
+
+    try:
+        while True:
+            # Send Frame (flattened binary or check if text is faster for simple JS parsing)
+            # For simplicity, sending bytes. 0 = Dead, 1 = Alive.
+            # Flatten grid
+            data = grid.astype("uint8").tobytes()
+            await websocket.send_bytes(data)
+
+            # Step
+            grid = engine.step(grid)
+
+            # Rate limit/Throttle
+            await asyncio.sleep(0.05)  # 20 FPS
+
+    except Exception as e:
+        print(f"Stream Closed: {e}")
+    finally:
+        pass
 
 
 @app.get("/atlas")
