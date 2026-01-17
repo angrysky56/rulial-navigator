@@ -102,7 +102,7 @@ class TensorBridge:
         # Strict limit on dense contraction size.
         # Contraction scales exponentially with open indices (qubits).
         # Limit adjusted for standard desktop usage.
-        HARD_QUBIT_LIMIT = 24  # 2^24 * 16 bytes ~ 268 MB state vector. Safe.
+        HARD_QUBIT_LIMIT = 22  # 2^24 * 16 bytes ~ 268 MB state vector. Safe.
         # 2^30 ~ 16 GB (Danger zone).
 
         if len(open_inds) > HARD_QUBIT_LIMIT:

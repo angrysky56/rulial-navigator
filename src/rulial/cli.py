@@ -168,7 +168,7 @@ def probe_2d(
     ),
     epochs: int = typer.Option(1000, help="Max epochs to run"),
     window: int = typer.Option(
-        24,
+        16,
         help="Observer Window Size (Quantum Analysis). Warning: Complexity scales exponentially.",
     ),
 ):

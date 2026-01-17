@@ -51,6 +51,13 @@ class RulialProbe2D:
         self.current_rule = seed_rule
         self.history = []
 
+        # Camera State (Active Observer)
+        self.camera_x = float(width) / 2.0
+        self.camera_y = float(height) / 2.0
+
+        # Golden Cache
+        self.filaments = []
+
     def run_loop(self, max_epochs=1000):
         layout = self._create_layout()
 
@@ -79,16 +86,48 @@ class RulialProbe2D:
                 # Use the last frame for observation
                 full_grid = grid_history[-1]
 
-                # --- CROP GRID FOR OBSERVER ---
-                # Center crop
-                cy, cx = self.height // 2, self.width // 2
-                half_obs = self.bridge.H // 2  # Use bridge dims
+                # --- CROP GRID FOR OBSERVER (Active Born-Maxwell Focus) ---
 
-                # Ensure bounds
-                y1 = max(0, cy - half_obs)
-                y2 = min(self.height, y1 + self.bridge.H)
-                x1 = max(0, cx - half_obs)
-                x2 = min(self.width, x1 + self.bridge.W)
+                # 1. Measure "Born Probability" (Center of Mass of Activity)
+                # We want to focus on where the information IS.
+                active_rows, active_cols = np.nonzero(full_grid)
+
+                target_y, target_x = self.camera_y, self.camera_x
+
+                if len(active_rows) > 0:
+                    # Calculate CoM
+                    com_y = np.mean(active_rows)
+                    com_x = np.mean(active_cols)
+
+                    # 2. Maxwell's Demon (Camera Movement)
+                    # Apply momentum/smoothing to avoid jitter
+                    # alpha = 0.2 (20% move towards target per frame)
+                    self.camera_y = (1 - 0.2) * self.camera_y + 0.2 * com_y
+                    self.camera_x = (1 - 0.2) * self.camera_x + 0.2 * com_x
+
+                    target_y, target_x = int(self.camera_y), int(self.camera_x)
+
+                else:
+                    # Universe is dead. Drift back to center.
+                    target_y, target_x = self.height // 2, self.width // 2
+                    self.camera_y, self.camera_x = target_y, target_x
+
+                # 3. Crop Window (Clamping to bounds for now, todo: toroidal crop)
+                # We limit the camera so the window stays inside the "Linear Memory"
+                # Even though the universe is Toroidal, the Tensor Bridge is Linear/Fixed-Boundary for V1.
+
+                half_obs = self.bridge.H // 2
+
+                # Clamp center so window doesn't go out of bounds
+                # min_y = half_obs, max_y = height - half_obs
+
+                safe_cy = max(half_obs, min(self.height - half_obs, target_y))
+                safe_cx = max(half_obs, min(self.width - half_obs, target_x))
+
+                y1 = int(safe_cy - half_obs)
+                y2 = int(y1 + self.bridge.H)
+                x1 = int(safe_cx - half_obs)
+                x2 = int(x1 + self.bridge.W)
 
                 # Adjust if strictly smaller
                 grid_crop = full_grid[y1:y2, x1:x2]
@@ -138,11 +177,31 @@ class RulialProbe2D:
                     "surprise": float(surprise),
                     "pred": float(pred_entropy),
                     "epoch": epoch,
+                    "cam": (target_y, target_x),  # Log camera pos
                 }
                 self.history.append(record)
 
+                # --- Capture Golden Filaments ---
+                # Criteria: Not Chaos (-1 / <0), Not Ice (<0.1)
+                # Range: 0.1 <= entropy <= 3.0
+                is_stable_liquid = 0.1 <= entropy <= 3.0
+                if is_stable_liquid:
+                    # Check if recently added to avoid duplicates from immediate neighbors?
+                    # For now just log all unique rule ints
+                    if not any(
+                        f["rule"] == int(self.current_rule) for f in self.filaments
+                    ):
+                        self.filaments.append(record)
+
                 self._update_display(
-                    layout, full_grid, epoch, rule_str, entropy, surprise
+                    layout,
+                    full_grid,
+                    epoch,
+                    rule_str,
+                    entropy,
+                    surprise,
+                    (target_y, target_x),
+                    len(self.filaments),
                 )
 
                 # Periodic Save (every 50 epochs)
@@ -151,7 +210,13 @@ class RulialProbe2D:
 
                 # Move to next rule
                 self.current_rule = next_rule
-                time.sleep(0.1)  # Brief pause for visual stability
+
+                # Explicit Garbage Collection to prevent OOM
+                import gc
+
+                gc.collect()
+
+                time.sleep(0.5)  # Pause for visual stability and CPU cooling
 
         # Final Save
         self.save_results()
@@ -165,6 +230,11 @@ class RulialProbe2D:
         try:
             with open(filename, "w") as f:
                 json.dump(self.history, f, indent=2)
+
+            # Save Filaments
+            if self.filaments:
+                with open("golden_filaments.json", "w") as f:
+                    json.dump(self.filaments, f, indent=2)
             # Update footer to show saved status logic would need access to layout, but skipping for simplicity
         except Exception as e:
             import sys
@@ -185,11 +255,22 @@ class RulialProbe2D:
         )
         return layout
 
-    def _update_display(self, layout, grid, epoch, rule_str, entropy, surprise):
+    def _update_display(
+        self,
+        layout,
+        grid,
+        epoch,
+        rule_str,
+        entropy,
+        surprise,
+        cam_pos,
+        filament_count=0,
+    ):
         # Header
+        cy, cx = cam_pos
         layout["header"].update(
             Panel(
-                f"RULIAL NAVIGATOR v2.0 | Epoch: {epoch} | Active Rule: {rule_str}",
+                f"RULIAL NAVIGATOR v2.2 | Epoch: {epoch} | Rule: {rule_str} | Cam: ({cy},{cx}) | Filaments: {filament_count}",
                 style="bold white on blue",
             )
         )
@@ -220,7 +301,9 @@ class RulialProbe2D:
 
         # Add classification based on entropy
         cls = "Unknown"
-        if entropy < 0.1:
+        if entropy < 0.0:
+            cls = "Class 3 (Chaos/Volume Law) 🔥"
+        elif entropy < 0.1:
             cls = "Class 1/2 (Ice)"
         elif entropy > 3.0:
             cls = "Class 3 (Fire)"
