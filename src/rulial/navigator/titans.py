@@ -39,6 +39,11 @@ class TitansMemory(nn.Module):
         # Metrics
         self.current_surprise = 0.0
 
+        # Auto-Device
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.to(self.device)
+        print(f"Titans Memory loaded on: {self.device}")
+
     def forward(self, rule_vector: torch.Tensor) -> torch.Tensor:
         """
         Predicts the topological complexity of a rule vector.
@@ -58,8 +63,14 @@ class TitansMemory(nn.Module):
         """
         # Convert inputs
         # Ensure rule_vector is float32
-        x = torch.tensor(rule_vector, dtype=torch.float32).unsqueeze(0)  # Batch size 1
-        y_true = torch.tensor([actual_entropy], dtype=torch.float32).unsqueeze(0)
+        x = (
+            torch.tensor(rule_vector, dtype=torch.float32).unsqueeze(0).to(self.device)
+        )  # Batch size 1
+        y_true = (
+            torch.tensor([actual_entropy], dtype=torch.float32)
+            .unsqueeze(0)
+            .to(self.device)
+        )
 
         self.train()  # Ensure gradients are active
         self.optimizer.zero_grad()
@@ -88,6 +99,7 @@ class TitansNavigator:
     def __init__(self, rule_size_bits: int):
         self.memory = TitansMemory(input_dim=rule_size_bits)
         self.input_dim = rule_size_bits
+        self.device = self.memory.device
 
     def probe_and_learn(self, rule_code: np.ndarray, bridge_entropy: float):
         """
@@ -99,9 +111,10 @@ class TitansNavigator:
         # If surprise was high, this rule is a "Landmark"
         # We can log this for the UI/User
         if surprise > 0.1:
-            print(
-                f"⚡ TITANS SURPRISE! Learned new complexity feature. Loss: {surprise:.4f}"
-            )
+            pass  # Keep UI clean
+            # print(
+            #    f"⚡ TITANS SURPRISE! Learned new complexity feature. Loss: {surprise:.4f}"
+            # )
 
         return surprise
 
@@ -132,9 +145,11 @@ class TitansNavigator:
         # Batch Predict
         self.memory.eval()  # Inference mode
         with torch.no_grad():
-            batch_x = torch.tensor(np.array(vectors), dtype=torch.float32)
+            batch_x = torch.tensor(np.array(vectors), dtype=torch.float32).to(
+                self.device
+            )
             predicted_tensor = self.memory(batch_x)
-            predicted_entropies = predicted_tensor.numpy().flatten()
+            predicted_entropies = predicted_tensor.cpu().numpy().flatten()
 
         # Return neighbor that minimizes distance to TARGET ENTROPY
         # Hypothesis: Class 4 "Life" lives on the Edge of Chaos.
