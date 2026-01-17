@@ -1,6 +1,7 @@
-import lzma
 import gzip
+import lzma
 import zlib
+
 
 def compress_ratio_lzma(data: bytes) -> float:
     """
@@ -13,6 +14,7 @@ def compress_ratio_lzma(data: bytes) -> float:
     compressed = lzma.compress(data)
     return len(compressed) / len(data)
 
+
 def compress_ratio_gzip(data: bytes) -> float:
     """
     Returns compression ratio using GZIP (faster, good for local redundancy).
@@ -21,6 +23,7 @@ def compress_ratio_gzip(data: bytes) -> float:
         return 0.0
     compressed = gzip.compress(data)
     return len(compressed) / len(data)
+
 
 def compress_ratio_zlib(data: bytes) -> float:
     """
