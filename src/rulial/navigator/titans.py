@@ -125,7 +125,16 @@ class TitansNavigator:
             predicted_tensor = self.memory(batch_x)
             predicted_entropies = predicted_tensor.numpy().flatten()
             
-        # Return neighbor with highest predicted complexity
-        best_idx = np.argmax(predicted_entropies)
+        # Return neighbor that minimizes distance to TARGET ENTROPY
+        # Hypothesis: Class 4 "Life" lives on the Edge of Chaos.
+        # Max Entropy (1.0) is Chaos/Volume Law.
+        # Zero Entropy (0.0) is Ice/Area Law (Trivial).
+        # We want "Complex Area Law" ~ 0.5 - 0.9 (depending on normalization).
+        # Let's target 0.95 (Superfluid Sweet Spot).
+        TARGET = 0.95
+        
+        # distance = abs(pred - TARGET)
+        distances = np.abs(predicted_entropies - TARGET)
+        best_idx = np.argmin(distances)
         
         return neighbors[best_idx], float(predicted_entropies[best_idx])

@@ -106,9 +106,17 @@ class RulialProbe2D:
                 
                 # Handle Sentinel: -1.0 means Volume Law (Max Entropy / Chaos)
                 # We interpret this as 1.0 (Maximum normalized complexity) for the neural net.
+                
+                # Normalization:
+                # Max Entropy ~ Number of Qubits in Cut = self.obs_size
+                # We want a [0, 1] scalar for the Sigmoid output.
+                max_possible_ent = float(self.obs_size) * 0.7 # ln(2) approx 0.693
+                
                 learning_entropy = entropy
                 if entropy < 0.0:
-                    learning_entropy = 1.0
+                    learning_entropy = 1.0 # Saturation
+                else:
+                    learning_entropy = min(1.0, entropy / max_possible_ent)
                     
                 # rule_bits is already np array
                 surprise = self.navigator.probe_and_learn(rule_bits, learning_entropy)
