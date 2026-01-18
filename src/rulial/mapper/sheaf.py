@@ -307,13 +307,19 @@ class SheafAnalyzer:
         simulator: Simulator
     ) -> float:
         """
-        Compute the monodromy index for a rule.
+        Compute the monodromy index for a rule (PROXY METHOD).
         
-        The monodromy measures how feedback loops interact:
-        - Φ ≈ +1 (resonance): changes reinforce, condensate tendency
-        - Φ ≈ -1 (tension): changes oppose, particle tendency
+        NOTE: This implementation uses dynamic simulation behavior (expansion ratio)
+        as a proxy for true sheaf monodromy. A rigorous implementation would:
+        1. Construct the actual sheaf over the spacetime graph
+        2. Compute parallel transport around loops
+        3. Measure the holonomy representation
         
-        For CA, we analyze how a perturbation propagates.
+        Current proxy interpretation:
+        - Φ ≈ +1 (resonance): expansion, condensate-like
+        - Φ ≈ -1 (tension): contraction/stasis, particle-like
+        
+        TODO: Implement exact calculation via sheaf path integral.
         """
         # Run simulation from sparse initial condition
         grid = simulator(rule_str, 16, 20, seed=42)

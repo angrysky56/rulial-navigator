@@ -9,9 +9,11 @@ Usage:
     uv run python scripts/replicate_all.py
 """
 
-import json
 import sys
 from pathlib import Path
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent))
 
 
 def main():
@@ -22,19 +24,19 @@ def main():
     
     # 1. Condensate Summary
     print("─── STEP 1: Condensate Scan Summary ───")
-    from scripts.analysis import condensate_summary
+    from analysis import condensate_summary
     condensate_summary()
     print()
     
     # 2. S-Parameter Correlation  
     print("─── STEP 2: S-Parameter Correlation ───")
-    from scripts.analysis import s_correlation
+    from analysis import s_correlation
     s_correlation()
     print()
     
     # 3. Control Test (non-B0)
     print("─── STEP 3: Control Test (Non-B0 Rules) ───")
-    from scripts.analysis import control_test
+    from analysis import control_test
     control_test()
     print()
     
@@ -43,7 +45,7 @@ def main():
     try:
         from rulial.runners.universality_test import run_universality_test
         run_universality_test(samples=10)
-    except ImportError:
+    except (ImportError, AttributeError):
         print("  (Skipped - run separately with: uv run python -m rulial.runners.universality_test)")
     print()
     

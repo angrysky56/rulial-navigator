@@ -249,6 +249,43 @@ We establish that:
 4. **Both phases support gliders** — particles = digital, condensates = solitonic
 5. **Monodromy classifies phases** — Φ = +1 (resonant), Φ = -1 (tense)
 
+---
+
+## 7. Limitations
+
+> [!IMPORTANT]
+> This section documents known limitations for scientific honesty.
+
+### 7.1 Proxy Methods
+
+The monodromy index (Φ) is computed using **dynamic expansion behavior** as a proxy for true sheaf monodromy. A rigorous implementation would compute parallel transport around loops in the sheaf structure. The current proxy shows strong empirical correlation with phase behavior.
+
+### 7.2 Goldilocks Precision
+
+The Goldilocks Zone (H = 0.3-0.6) identifies computational candidates with:
+- **73% strict precision** (gliders found)
+- **80% relaxed precision** (any computational structure)
+
+~20% of Goldilocks rules show no detectable computational structures.
+
+### 7.3 Sample Sizes
+
+| Test | Sample Size | Confidence |
+|------|-------------|------------|
+| B0/B1 totalistic | 100 rules | High |
+| 3-group universality | 30 per group | Moderate |
+| Goldilocks stress test | 15 rules | Exploratory |
+
+Larger sample sizes would increase statistical confidence.
+
+### 7.4 Post-Hoc Definition
+
+The Goldilocks Zone thresholds (H = 0.3-0.6) were empirically derived after observing where known computational rules (e.g., Life) fell. Future work should validate these thresholds on independent rule samples.
+
+---
+
+## 8. Conclusion
+
 This provides the first systematic evidence that:
 - **Wolfram's Class 4 splits into distinct vacuum phases**
 - **Computation is a spectral property, not a phase property**

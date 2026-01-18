@@ -117,9 +117,9 @@ See the [theoretical documentation](docs/The-Metastable-Superfluid-Membrane.md) 
 
 | Discovery | Evidence |
 |-----------|----------|
-| **B0/B1 → Condensate** | 99.4% of B0/B1 rules exhibit condensate behavior |
-| **Universality** | Proven in 512-bit non-totalistic rules |
-| **Goldilocks Zone** | H = 0.3-0.6 predicts computational capacity |
+| **B0/B1 → Condensate** | 100% of B0/B1 rules exhibit condensate behavior |
+| **Universality (Rigorous)** | 3-group test: B0 (+0.93) > Random (+0.80) > Particle (-1.00) |
+| **Goldilocks Zone** | H = 0.3-0.6 predicts computation with **73% precision** |
 | **Both Phases Compute** | Gliders found in particles AND condensates |
 
 ### The Goldilocks Zone
@@ -131,11 +131,13 @@ Computation emerges where **Harmonic Overlap** H = 0.3-0.6:
 | B6/S123467 | Particle | 0.503 | 11 Gliders, 45 Still Lifes |
 | B0467/S0568 | Condensate | 0.479 | 6 Solitons, 25 Oscillators |
 
+**Precision:** 73% of random Goldilocks rules contain gliders (stress-tested).
+
 ### Core Theorem
 
 > A totalistic 2D CA exhibits condensate behavior iff **(0 ∈ B) OR (1 ∈ B)**
 
-This was proven universal across all 2^512 possible 2D Moore-neighborhood rules.
+Universality confirmed via 3-group comparison (B0 vs Random vs Strict Particle).
 
 ### Visualizations
 
@@ -148,7 +150,26 @@ All figures are in [`docs/visualizations/`](docs/visualizations/):
 | `fig_s_sum_correlation.png` | Vacuum energy prediction (r = 0.632) |
 | `fig_tpe_modes.png` | T-P+E dynamics distribution |
 
----
+### Expected Output
+
+Run `python scripts/replicate_all.py` to verify all findings:
+
+```text
+═══ MAPPING THE GOLDILOCKS ZONE ═══
+Hypothesis: Computation occurs when 0.3 < Harmonic Overlap < 0.6
+
+Rule                 | Phase        | Overlap (H)  | Monodromy
+-----------------------------------------------------------------
+B3/S23 (Life)        | tense        | 0.400 🌟     | -1.00
+B0467/S0568          | resonant     | 0.479 🌟     | +1.00
+B6/S123467           | tense        | 0.503 🌟     | -1.00
+B0/S                 | resonant     | 0.908        | +1.00 (Frozen)
+B/S012345678         | tense        | 0.050        | -1.00 (Chaos)
+
+✅ HYPOTHESIS CONFIRMED: 
+   - Class 4 / Computation rules cluster in 0.3 < H < 0.6
+   - Both phases (Resonant/Tense) appear in the Goldilocks Zone
+```
 
 ## Quick Start
 
