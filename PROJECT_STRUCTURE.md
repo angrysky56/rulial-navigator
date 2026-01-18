@@ -2,233 +2,205 @@
 
 A comprehensive map of the codebase for the Rulial Navigator system.
 
+---
+
 ## Directory Tree
 
 ```
 rulial-navigator/
+│
 ├── src/rulial/
 │   ├── cli.py                    # Main CLI entry point
+│   ├── pipeline.py               # Unified analysis pipeline
 │   │
-│   ├── compression/              # Kolmogorov Complexity & Metrics
-│   │   ├── metrics.py            # TelemetryAnalyzer (compression ratios)
-│   │   ├── neural.py             # Neural compression baseline
-│   │   └── rigid.py              # LZMA rigid compression
+│   ├── compression/              # Complexity Measurement
+│   │   ├── flow.py               # Universal Compression Stack ★
+│   │   ├── metrics.py            # Telemetry analyzer
+│   │   ├── neural.py             # LSTM predictor
+│   │   └── rigid.py              # LZMA compression
 │   │
-│   ├── engine/                   # CA Simulation Engines
-│   │   ├── eca.py                # 1D Elementary Cellular Automata
-│   │   ├── spacetime.py          # SpacetimeUtil (causal graphs, point clouds)
-│   │   └── totalistic.py         # 2D Totalistic CA (B.../S... rules)
+│   ├── engine/                   # Simulation Engines
+│   │   ├── eca.py                # 1D Elementary CA
+│   │   ├── totalistic.py         # 2D Outer-Totalistic CA
+│   │   └── spacetime.py          # Causal graphs, point clouds
 │   │
 │   ├── mapper/                   # Topological Analysis
-│   │   ├── atlas.py              # AtlasMapper (rule space navigation)
-│   │   ├── entailment.py         # EntailmentCone (causal structure)
-│   │   └── topology.py           # TopologyMapper (TDA, Betti numbers)
+│   │   ├── topology.py           # Persistent homology (GUDHI)
+│   │   ├── tpe.py                # T-P+E Framework ★
+│   │   ├── condensate.py         # Vacuum phase detection ★
+│   │   ├── atlas.py              # Rule space navigation
+│   │   └── entailment.py         # Causal structure
 │   │
-│   ├── mining/                   # Physics Extraction (Phases 12-15)
-│   │   ├── extractor.py          # ParticleMiner (gliders, blocks, oscillators)
-│   │   ├── collider.py           # Collider (interaction algebra, reactions)
-│   │   ├── synthesizer.py        # Synthesizer (logic gadget construction)
-│   │   └── query.py              # RuliadQuery (natural language API)
+│   ├── mining/                   # Physics Extraction
+│   │   ├── extractor.py          # Particle miner
+│   │   ├── collider.py           # Reaction tables
+│   │   ├── synthesizer.py        # Logic gadgets (WIRE, EATER, NOT)
+│   │   ├── oligon.py             # Oligon counter ★
+│   │   └── query.py              # Natural language API
 │   │
-│   ├── navigator/                # AI Agents
-│   │   ├── titans.py             # TitansMemory (test-time learning)
+│   ├── navigator/                # AI Exploration
+│   │   ├── titans.py             # Test-time learning ★
 │   │   ├── swarm.py              # Swarm navigation
-│   │   ├── gradient.py           # Gradient-based exploration
+│   │   ├── gradient.py           # Gradient descent
 │   │   ├── annealing.py          # Simulated annealing
-│   │   └── classifier.py         # Wolfram class classifier
+│   │   └── classifier.py         # Wolfram classifier
 │   │
 │   ├── quantum/                  # Quantum Bridge
-│   │   ├── bridge.py             # TensorBridge (PEPS, entanglement entropy)
-│   │   ├── kernel.py             # Quantum kernel methods
+│   │   ├── bridge.py             # PEPS tensor network
+│   │   ├── kernel.py             # Quantum kernel navigator
 │   │   ├── superfluid.py         # Topological phase detection
 │   │   └── zx_reducer.py         # ZX-calculus simplification
 │   │
-│   ├── runners/                  # Execution Runners
-│   │   ├── probe_2d.py           # Original 2D probe (Titans + TensorBridge)
+│   ├── runners/                  # Atlas Scanners
+│   │   ├── probe_2d.py           # Original (Titans + TensorBridge)
 │   │   ├── probe_2d_v2.py        # Simplified probe
-│   │   └── probe_2d_v3.py        # Atlas mapper (Born/Survive grid scan)
+│   │   ├── probe_2d_v3.py        # Grid scanner
+│   │   └── probe_2d_v4.py        # Modern V4 scanner ★
 │   │
-│   └── server/                   # Web Server
+│   └── server/                   # Web Interface
 │       ├── rpc.py                # FastAPI endpoints
 │       └── static/
-│           └── observatory.html  # 3D/2D visualization (Three.js)
+│           └── observatory.html  # Three.js visualization
 │
-├── docs/                         # Documentation & Theory
-│   ├── Mapping-Infinite-Rulial-Space.md    # Core specification
-│   ├── The_Ruliad.md                       # Ruliad theory survey
-│   ├── Geometry-of-the-Quantum-Branchial-Graph.md
-│   ├── Causal-Invariance-and-the-Convergence-of-Multiway-Systems.md
-│   └── topological_maps_of_computational_evolution.md
+├── docs/                         # Documentation
+│   ├── USAGE_GUIDE.md            # CLI & API reference ★
+│   ├── The-Metastable-Superfluid-Membrane.md
+│   ├── Emes-and-the-Glass-Floor.md
+│   ├── Particles-as-Vortex-Knots.md
+│   ├── Dark-Matter-as-Oligons.md
+│   ├── Galactic-Tension-and-Dimension-Decay.md
+│   ├── Dark-Energy-and-Hubble-Tension.md
+│   ├── Quantum-Mechanics-from-Branchial-Space.md
+│   ├── Vacuum-Condensate-Discovery.md
+│   └── Whitepaper-Vacuum-Condensate-Phases.md
 │
-├── *.py                          # Root scripts
-│   ├── mine_life.py              # Miner test (Game of Life)
-│   ├── test_miner.py             # Glider detection unit test
-│   ├── debug_engine.py           # Engine dynamics debugger
-│   ├── verify_ground_truth.py    # Classification calibration
-│   ├── verify_rule_behavior.py   # Engine behavior verification
-│   ├── merge_atlas.py            # Combine partial atlas scans
-│   └── replay_filaments.py       # Golden filament replay
+├── data/                         # Generated Data
+│   ├── atlas_grid.json           # V1-V3 Atlas data
+│   ├── atlas_v4.json             # V4 Atlas with phases
+│   ├── golden_filaments.json     # Class 4 discoveries
+│   └── titans_history.json       # Learning history
 │
-└── data/
-    ├── atlas_grid.json           # 2D Atlas data (Born/Survive grid)
-    ├── golden_filaments.json     # Discovered Class 4 rules
-    └── titans_history.json       # Titans learning history
+└── *.py                          # Root scripts (testing)
 ```
+
+★ = Key modules
 
 ---
 
 ## Module Purposes
 
-### 1. `compression/` - Measuring Complexity
+### compression/ — Measuring Complexity
 
-| File         | Purpose                                                    |
-| ------------ | ---------------------------------------------------------- |
-| `metrics.py` | `TelemetryAnalyzer` - computes compression ratio, progress |
-| `neural.py`  | Neural network-based compression baseline                  |
-| `rigid.py`   | LZMA-based rigid compression for Kolmogorov proxy          |
+| File         | Purpose                                                              |
+| ------------ | -------------------------------------------------------------------- |
+| `flow.py`    | **Universal Compression Stack** — Rigid (LZMA) + Fluid (LSTM) layers |
+| `metrics.py` | Telemetry analyzer, compression ratios                               |
+| `neural.py`  | LSTM-based prediction for neural compression                         |
+| `rigid.py`   | LZMA-based rigid compression                                         |
 
-### 2. `engine/` - Simulating Universes
+### engine/ — Simulating Universes
 
-| File            | Purpose                                                  |
-| --------------- | -------------------------------------------------------- |
-| `eca.py`        | 1D Elementary Cellular Automata (Wolfram rules 0-255)    |
-| `totalistic.py` | 2D Totalistic CA engine (B.../S... format, e.g., B3/S23) |
-| `spacetime.py`  | Utilities for causal graphs, point clouds, ASCII output  |
+| File            | Purpose                                       |
+| --------------- | --------------------------------------------- |
+| `eca.py`        | 1D Elementary Cellular Automata (rules 0-255) |
+| `totalistic.py` | 2D Outer-Totalistic CA (B.../S... format)     |
+| `spacetime.py`  | Causal graphs, point clouds, ASCII output     |
 
-### 3. `mapper/` - Analyzing Topology
+### mapper/ — Topological Analysis
 
-| File            | Purpose                                               |
-| --------------- | ----------------------------------------------------- |
-| `topology.py`   | `TopologyMapper` - Persistent Homology, Betti numbers |
-| `entailment.py` | `EntailmentCone` - Causal structure and logical depth |
-| `atlas.py`      | `AtlasMapper` - Rule space navigation and caching     |
+| File            | Purpose                                                 |
+| --------------- | ------------------------------------------------------- |
+| `topology.py`   | **TopologyMapper** — Persistent homology, Betti numbers |
+| `tpe.py`        | **T-P+E Framework** — Toroidal/Poloidal dynamics        |
+| `condensate.py` | **VacuumCondensateAnalyzer** — Phase detection          |
+| `atlas.py`      | AtlasMapper — Rule space navigation                     |
+| `entailment.py` | EntailmentCone — Causal structure                       |
 
-### 4. `mining/` - Extracting Physics (NEW: Phases 12-15)
+### mining/ — Physics Extraction
 
 | File             | Purpose                                                     |
 | ---------------- | ----------------------------------------------------------- |
-| `extractor.py`   | `ParticleMiner` - Finds gliders, blocks, oscillators        |
-| `collider.py`    | `Collider` - Tests particle interactions, reaction tables   |
-| `synthesizer.py` | `Synthesizer` - Identifies logic gadgets (WIRE, EATER, NOT) |
-| `query.py`       | `RuliadQuery` - Natural language API for AI agents          |
+| `extractor.py`   | **ParticleMiner** — Finds gliders, oscillators, still lifes |
+| `collider.py`    | **Collider** — Tests particle interactions                  |
+| `synthesizer.py` | **Synthesizer** — Identifies WIRE, EATER, NOT gates         |
+| `oligon.py`      | **OligonCounter** — Counts small stable structures          |
+| `query.py`       | Natural language API for AI agents                          |
 
-### 5. `navigator/` - AI Exploration Agents
+### navigator/ — AI Exploration
+
+| File            | Purpose                                              |
+| --------------- | ---------------------------------------------------- |
+| `titans.py`     | **TitansNavigator** — Online learning, hallucination |
+| `swarm.py`      | Swarm-based parallel exploration                     |
+| `gradient.py`   | Gradient descent in entropy landscape                |
+| `annealing.py`  | Simulated annealing explorer                         |
+| `classifier.py` | Wolfram class 1/2/3/4 classifier                     |
+
+### quantum/ — Quantum Bridge
 
 | File            | Purpose                                           |
 | --------------- | ------------------------------------------------- |
-| `titans.py`     | `TitansMemory` - Test-time learning neural memory |
-| `swarm.py`      | Swarm-based parallel exploration                  |
-| `gradient.py`   | Gradient descent in entropy landscape             |
-| `annealing.py`  | Simulated annealing explorer                      |
-| `classifier.py` | Wolfram class 1/2/3/4 classifier                  |
+| `bridge.py`     | **TensorBridge** — Maps CA → PEPS tensor networks |
+| `kernel.py`     | Quantum kernel navigator (Qiskit)                 |
+| `superfluid.py` | Topological phase detection                       |
+| `zx_reducer.py` | ZX-calculus circuit simplification                |
 
-### 6. `quantum/` - Quantum Bridge
+### runners/ — Atlas Scanners
 
-| File            | Purpose                                                |
-| --------------- | ------------------------------------------------------ |
-| `bridge.py`     | `TensorBridge` - Maps CA grids to PEPS tensor networks |
-| `kernel.py`     | Quantum kernel methods for similarity                  |
-| `superfluid.py` | Topological phase detection                            |
-| `zx_reducer.py` | ZX-calculus circuit simplification                     |
-
-### 7. `runners/` - Execution Runners
-
-| File             | Purpose                                          |
-| ---------------- | ------------------------------------------------ |
-| `probe_2d.py`    | Full-featured probe (Titans + TensorBridge + UI) |
-| `probe_2d_v2.py` | Simplified probe (classification metrics only)   |
-| `probe_2d_v3.py` | Atlas mapper (2D Born/Survive grid scanner)      |
-
-### 8. `server/` - Web Interface
-
-| File               | Purpose                                                     |
-| ------------------ | ----------------------------------------------------------- |
-| `rpc.py`           | FastAPI server with `/atlas/history`, `/simulate` endpoints |
-| `observatory.html` | Three.js visualization (2D heatmap + 3D voxel view)         |
+| File             | Purpose                                                  |
+| ---------------- | -------------------------------------------------------- |
+| `probe_2d.py`    | Original (Titans + TensorBridge + Rich UI)               |
+| `probe_2d_v2.py` | Simplified classification probe                          |
+| `probe_2d_v3.py` | Grid scanner (Born × Survive)                            |
+| `probe_2d_v4.py` | **Modern V4** — T-P+E + Condensate + Multi-signal voting |
 
 ---
 
 ## Data Flow
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                          EXPLORATION LAYER                              │
-│  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐           │
-│  │  Titans  │    │  Swarm   │    │ Gradient │    │ Annealing│           │
-│  │  Memory  │ ◄──│ Explorer │ ◄──│ Descent  │ ◄──│ Explorer │           │
-│  └────┬─────┘    └──────────┘    └──────────┘    └──────────┘           │
-│       │                                                                 │
-│       ▼                                                                 │
-│  ┌───────────────────────────────────────────────────────────┐          │
-│  │                      SIMULATION LAYER                     │          │
-│  │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    │          │
-│  │  │     ECA     │    │  Totalistic │    │  Spacetime  │    │          │
-│  │  │  (1D Rules) │    │  (2D Rules) │    │   Utilities │    │          │
-│  │  └─────────────┘    └──────┬──────┘    └─────────────┘    │          │
-│  └────────────────────────────┼──────────────────────────────┘          │
-│                               │                                         │
-│       ┌───────────────────────┼─────────────────────────────┐           │
-│       │                ANALYSIS LAYER                       │           │
-│       │  ┌──────────┐    ┌──────────┐    ┌──────────┐       │           │
-│       │  │Compression│   │ Topology │    │  Quantum │       │           │
-│       │  │  Metrics │    │   TDA    │    │  Bridge  │       │           │
-│       │  └──────────┘    └──────────┘    └──────────┘       │           │
-│       └─────────────────────────┬───────────────────────────┘           │
-│                                 │                                       │
-│       ┌─────────────────────────┼────────────────────────────┐          │
-│       │              EXTRACTION LAYER (NEW)                  │          │
-│       │  ┌──────────┐    ┌──────────┐    ┌──────────┐        │          │
-│       │  │  Miner   │───▶│ Collider │───▶│Synthesizer│       │          │
-│       │  │(Particles)│   │(Reactions)│   │ (Gadgets) │       │          │
-│       │  └──────────┘    └──────────┘    └────┬─────┘        │          │
-│       └───────────────────────────────────────┼──────────────┘          │
-│                                               │                         │
-│       ┌───────────────────────────────────────┼───────────────┐         │
-│       │                   QUERY LAYER                         │         │
-│       │               ┌──────────────┐                        │         │
-│       │               │ RuliadQuery  │◄── "I need a NOT gate" │         │
-│       │               │   (NL API)   │                        │         │
-│       │               └──────────────┘                        │         │
-│       └───────────────────────────────────────────────────────┘         │
-│                                                                         │
-│       ┌───────────────────────────────────────────────────────┐         │
-│       │                   OUTPUT LAYER                        │         │
-│       │  ┌────────────┐    ┌────────────┐    ┌────────────┐   │         │
-│       │  │ Atlas JSON │    │ Observatory│    │  Filaments │   │         │
-│       │  │  (2D Map)  │    │   (WebUI)  │    │  (Catalog) │   │         │
-│       │  └────────────┘    └────────────┘    └────────────┘   │         │
-│       └───────────────────────────────────────────────────────┘         │
-└─────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                     EXPLORATION LAYER                       │
+│  Titans Memory ◄── Online Learning ◄── Hallucination        │
+└─────────────────────────────┬───────────────────────────────┘
+                              │
+┌─────────────────────────────┼───────────────────────────────┐
+│                   SIMULATION LAYER                          │
+│  ECA (1D) │ Totalistic (2D) │ Spacetime Utils               │
+└─────────────────────────────┼───────────────────────────────┘
+                              │
+┌─────────────────────────────┼───────────────────────────────┐
+│                   ANALYSIS LAYER                            │
+│  Compression Flow │ T-P+E │ Condensate │ Topology │ Quantum │
+└─────────────────────────────┼───────────────────────────────┘
+                              │
+┌─────────────────────────────┼───────────────────────────────┐
+│                   EXTRACTION LAYER                          │
+│  Particles → Reactions → Gadgets │ Oligons                  │
+└─────────────────────────────┼───────────────────────────────┘
+                              │
+┌─────────────────────────────┼───────────────────────────────┐
+│                   INTERFACE LAYER                           │
+│  CLI │ Query API │ Web Observatory                          │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Key Integrations Yet To Complete
+## CLI Commands
 
-| Integration             | Status           | Notes                                               |
-| ----------------------- | ---------------- | --------------------------------------------------- |
-| Titans → Miner/Collider | 🔴 Not Connected | Titans finds rules, Miner analyzes them             |
-| probe_2d_v3 → Query     | 🔴 Not Connected | Atlas data should feed Query cache                  |
-| TensorBridge → Mining   | 🔴 Not Connected | Entanglement entropy could guide particle detection |
-| Observatory → Mining    | 🔴 Not Connected | Click a rule in UI → Show its particles             |
+| Command                                       | Purpose                   |
+| --------------------------------------------- | ------------------------- |
+| `uv run rulial --help`                        | Show all commands         |
+| `uv run rulial entropy-flow --rule "RULE"`    | Compression flow analysis |
+| `uv run rulial tpe --rule "RULE"`             | T-P+E dynamics            |
+| `uv run rulial condensate --rule "RULE"`      | Vacuum phase detection    |
+| `uv run rulial oligons --rule "RULE"`         | Oligon count              |
+| `uv run rulial serve`                         | Start web observatory     |
+| `uv run python -m rulial.runners.probe_2d_v4` | Run V4 atlas scan         |
 
 ---
 
-## Running Commands
+## Full Documentation
 
-```bash
-# Start the Observatory Web Server
-uv run rulial serve
-
-# Run the 2D Atlas Scan
-uv run python -m rulial.runners.probe_2d_v3 --samples 200 --output atlas_grid.json
-
-# Run the full Titans-powered probe
-uv run python -m rulial.runners.probe_2d --mode titans
-
-# Analyze a specific rule
-uv run python -c "from rulial.mining.query import query_ruliad; print(query_ruliad('Analyze B3/S23'))"
-
-# Test the Miner
-uv run python test_miner.py
-```
+See [`docs/USAGE_GUIDE.md`](docs/USAGE_GUIDE.md) for complete reference.

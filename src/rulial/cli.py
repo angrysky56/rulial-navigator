@@ -291,5 +291,23 @@ def oligons(
     console.print(result.summary())
 
 
+@app.command()
+def condensate(
+    rule: str = typer.Option("B078/S012478", help="Rule to analyze"),
+):
+    """
+    Vacuum Condensate Analysis.
+
+    Detects rules where single cells spontaneously expand
+    to fill the membrane at a characteristic equilibrium density.
+    """
+    from rulial.mapper.condensate import VacuumCondensateAnalyzer
+
+    console.print(f"[bold cyan]Vacuum condensate analysis for {rule}...[/bold cyan]")
+    analyzer = VacuumCondensateAnalyzer()
+    result = analyzer.analyze(rule)
+    console.print(result.summary())
+
+
 if __name__ == "__main__":
     app()

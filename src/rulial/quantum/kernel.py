@@ -3,7 +3,6 @@ from typing import List, Tuple
 import numpy as np
 
 # Import Qiskit components
-# Note: Qiskit structure changed in v1.0, checking availability
 try:
     from qiskit.circuit.library import ZZFeatureMap
     from qiskit.utils import algorithm_globals
@@ -20,9 +19,12 @@ class QuantumKernelNavigator:
     Maps discrete rules to continuous Hilbert space for semantic comparison.
     """
 
-    def __init__(self, n_features: int = 8):
+    def __init__(self, n_features: int = 8, seed: int = 42):
         self.enabled = HAS_QISKIT
         if self.enabled:
+            # Set random seed for reproducibility
+            algorithm_globals.random_seed = seed
+
             # Map 8 bits of the rule to 8 qubits? Or feature map.
             # ZZFeatureMap is good for binary data interaction.
             self.feature_map = ZZFeatureMap(feature_dimension=n_features, reps=1)
