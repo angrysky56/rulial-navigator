@@ -254,5 +254,42 @@ def entropy_flow(
     console.print(result.summary())
 
 
+@app.command()
+def tpe(
+    rule: str = typer.Option("B3/S23", help="Rule to analyze"),
+):
+    """
+    T-P+E Analysis: Toroidal-Poloidal Emergence.
+
+    Measures expansion (T) vs contraction (P) dialectic.
+    E = (T·P) × |T-P| is maximized at balanced dynamics.
+    """
+    from rulial.mapper.tpe import TPEAnalyzer
+
+    console.print(f"[bold cyan]T-P+E analysis for {rule}...[/bold cyan]")
+    analyzer = TPEAnalyzer()
+    result = analyzer.analyze(rule)
+    console.print(result.summary())
+
+
+@app.command()
+def oligons(
+    rule: str = typer.Option("B3/S23", help="Rule to analyze"),
+):
+    """
+    Count oligons (small stable structures).
+
+    Oligons are the "dark matter scaffolding" of the Ruliad:
+    - Still lifes (period 1)
+    - Oscillators (period 2-4)
+    """
+    from rulial.mining.oligon import OligonCounter
+
+    console.print(f"[bold cyan]Counting oligons for {rule}...[/bold cyan]")
+    counter = OligonCounter()
+    result = counter.count(rule)
+    console.print(result.summary())
+
+
 if __name__ == "__main__":
     app()
