@@ -185,5 +185,68 @@ def probe_2d(
     runner.run_loop(max_epochs=epochs)
 
 
+@app.command()
+def pipeline(
+    mode: str = typer.Option("analyze", help="Mode: explore, catalog, analyze, query"),
+    rule: str = typer.Option("B3/S23", help="Rule to analyze"),
+    steps: int = typer.Option(20, help="Exploration steps"),
+    query: str = typer.Option("", help="Query string for query mode"),
+):
+    """
+    Unified Ruliad Pipeline: Titans + Atlas + Mining + Query.
+    """
+    from rulial.pipeline import UnifiedPipeline
+
+    pipe = UnifiedPipeline()
+
+    if mode == "explore":
+        console.print(
+            f"[bold cyan]Starting Titans exploration from {rule}...[/bold cyan]"
+        )
+        results = pipe.explore(steps=steps, start_rule=rule)
+        console.print(
+            f"\n[green]Exploration complete. Analyzed {len(results)} rules.[/green]"
+        )
+        logic_capable = sum(1 for r in results if r.is_logic_capable)
+        console.print(f"[gold1]Logic-capable rules found: {logic_capable}[/gold1]")
+
+    elif mode == "catalog":
+        console.print("[bold cyan]Cataloging Class 4 rules from atlas...[/bold cyan]")
+        results = pipe.catalog_atlas()
+        console.print(
+            f"\n[green]Cataloging complete. Analyzed {len(results)} rules.[/green]"
+        )
+
+    elif mode == "query":
+        if query:
+            console.print(f"[bold cyan]Query: {query}[/bold cyan]")
+            result = pipe.query(query)
+            console.print(result)
+        else:
+            console.print(
+                "[yellow]Usage: pipeline --mode query --query 'your question'[/yellow]"
+            )
+
+    else:  # analyze
+        console.print(f"[bold cyan]Analyzing {rule}...[/bold cyan]")
+        result = pipe.analyze_rule(rule)
+        console.print(result.summary())
+
+
+@app.command()
+def entropy_flow(
+    rule: str = typer.Option("B3/S23", help="Rule to analyze"),
+):
+    """
+    Analyze entropy flow direction for a rule.
+    """
+    from rulial.mapper.entropy_flow import EntropyFlowAnalyzer
+
+    console.print(f"[bold cyan]Analyzing entropy flow for {rule}...[/bold cyan]")
+    analyzer = EntropyFlowAnalyzer()
+    result = analyzer.analyze(rule)
+    console.print(result.summary())
+
+
 if __name__ == "__main__":
     app()

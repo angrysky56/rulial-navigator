@@ -27,7 +27,7 @@ def test_rule(rule_id: int):
         grid = engine.init_grid(64, 64, "random", density=0.5)
 
         counts = []
-        for t in range(100):
+        for _ in range(100):
             counts.append(np.sum(grid))
             grid = engine.step(grid)
 
@@ -60,3 +60,53 @@ if __name__ == "__main__":
     test_rule(224)  # Game of Life (Reference)
     test_rule(14449)  # The "Inverter"
     test_rule(222)  # Another Gold Filament
+
+    # User Requested Rule: B45/S236
+    # We need to test the string directly since we don't have its int ID handy
+    print("--- Testing User Rule B45/S236 ---")
+    engine = Totalistic2DEngine("B45/S236")
+    total_alive_trace = np.zeros(100)
+
+    # Must declare grid for scope
+    grid = None
+
+    for i in range(5):
+        np.random.seed(42 + i)
+        grid = engine.init_grid(64, 64, "random", density=0.5)
+        counts = []
+        for _ in range(100):
+            counts.append(np.sum(grid))
+            grid = engine.step(grid)
+        total_alive_trace += np.array(counts)
+
+    avg_trace = total_alive_trace / 5.0
+    print(f"Avg Alive Count: {avg_trace[0]:.1f}, {avg_trace[-1]:.1f}")
+
+    next_grid = engine.step(grid)
+    diff = np.sum(np.abs(grid.astype(int) - next_grid.astype(int)))
+    print(f"Dynamism: {diff} pixel changes")
+    print("")
+
+    # Standard Game of Life (Baseline)
+    print("--- Testing Standard Life B3/S23 ---")
+    engine = Totalistic2DEngine("B3/S23")
+    total_alive_trace = np.zeros(100)
+
+    grid = None
+
+    for i in range(5):
+        np.random.seed(42 + i)
+        grid = engine.init_grid(64, 64, "random", density=0.5)
+        counts = []
+        for _ in range(100):
+            counts.append(np.sum(grid))
+            grid = engine.step(grid)
+        total_alive_trace += np.array(counts)
+
+    avg_trace = total_alive_trace / 5.0
+    print(f"Avg Alive Count: {avg_trace[0]:.1f}, {avg_trace[-1]:.1f}")
+
+    next_grid = engine.step(grid)
+    diff = np.sum(np.abs(grid.astype(int) - next_grid.astype(int)))
+    print(f"Dynamism: {diff} pixel changes")
+    print("")

@@ -128,12 +128,13 @@ async def probe_rule(req: ProbeRequest):
     )
 
 
-@app.websocket("/stream/{rule_str}")
-async def websocket_stream(websocket: WebSocket, rule_str: str):
+@app.websocket("/stream")
+async def websocket_stream(websocket: WebSocket, rule: str = "B3/S23"):
     """
     Stream a 2D Totalistic Universe over WebSocket.
     """
     await websocket.accept()
+    rule_str = rule  # Local var for compatibility
 
     # 1. Init Engine
     try:
@@ -185,6 +186,21 @@ async def get_atlas():
 async def get_filaments():
     """Get discovered Class 4 filaments."""
     return atlas.get_gold_filaments()
+
+
+@app.get("/atlas/history")
+async def get_history():
+    """Get the full exploration history (The Star Chart)."""
+    import json
+
+    # Prefer atlas_grid.json (from 2D Mapper V3)
+    history_file = "atlas_grid.json"
+    if not os.path.exists(history_file):
+        history_file = "atlas_data.json"  # Fallback to V2 list
+    if os.path.exists(history_file):
+        with open(history_file, "r") as f:
+            return json.load(f)
+    return []
 
 
 def start_server(port: int = 8000):

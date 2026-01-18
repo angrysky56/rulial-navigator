@@ -1,0 +1,82 @@
+[
+  {
+    "x": 287,
+    "y": 153,
+    "rule_str": "B012348/S0347",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004736328125,
+    "betti_1": 0
+  },
+  {
+    "x": 28,
+    "y": 229,
+    "rule_str": "B234/S02567",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 354,
+    "y": 447,
+    "rule_str": "B1568/S01234578",
+    "wolfram_class": 3,
+    "compression_ratio": 0.073291015625,
+    "betti_1": 10
+  },
+  {
+    "x": 176,
+    "y": 60,
+    "rule_str": "B457/S2345",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 242,
+    "y": 332,
+    "rule_str": "B14567/S2368",
+    "wolfram_class": 3,
+    "compression_ratio": 0.079345703125,
+    "betti_1": 12
+  },
+  {
+    "x": 429,
+    "y": 246,
+    "rule_str": "B023578/S124567",
+    "wolfram_class": 3,
+    "compression_ratio": 0.068173828125,
+    "betti_1": 9
+  },
+  {
+    "x": 342,
+    "y": 94,
+    "rule_str": "B12468/S12346",
+    "wolfram_class": 3,
+    "compression_ratio": 0.078974609375,
+    "betti_1": 13
+  },
+  {
+    "x": 333,
+    "y": 222,
+    "rule_str": "B02368/S123467",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0784765625,
+    "betti_1": 11
+  },
+  {
+    "x": 234,
+    "y": 508,
+    "rule_str": "B13567/S2345678",
+    "wolfram_class": 2,
+    "compression_ratio": 0.0038427734375,
+    "betti_1": 6
+  },
+  {
+    "x": 297,
+    "y": 416,
+    "rule_str": "B0358/S578",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0696484375,
+    "betti_1": 25
+  }
+]

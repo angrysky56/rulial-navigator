@@ -11,7 +11,8 @@
         color: #0f0;
         font-family: monospace;
       }
-      #ui {
+      #ui,
+      #sim-ui {
         position: absolute;
         top: 10px;
         left: 10px;
@@ -20,11 +21,19 @@
         background: rgba(0, 0, 0, 0.8);
         border: 1px solid #0f0;
       }
-      input {
-        background: #111;
+      #sim-ui {
+        display: none; /* Hidden by default */
+        top: 10px;
+        right: 10px; /* Top right for sim controls */
+        left: auto;
+      }
+      #tooltip {
+        position: absolute;
+        background: rgba(0, 20, 0, 0.9);
         border: 1px solid #0f0;
-        color: #0f0;
         padding: 5px;
+        pointer-events: none;
+        display: none;
       }
       button {
         background: #0f0;
@@ -33,9 +42,20 @@
         padding: 5px 10px;
         cursor: pointer;
         font-weight: bold;
+        margin-top: 5px;
       }
       button:hover {
         background: #fff;
+      }
+      .legend {
+        font-size: 12px;
+        color: #888;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        display: inline-block;
+        border-radius: 50%;
       }
     </style>
     <!-- Load Three.js from CDN -->
@@ -49,70 +69,337 @@
     </script>
   </head>
   <body>
+    <!-- Atlas UI -->
     <div id="ui">
-      <h2>Rulial Observatory</h2>
-      <div>
-        <input
-          type="text"
-          id="ruleInput"
-          value="B45/S236"
-          placeholder="Rule (e.g. B3/S23)"
-        />
-        <button id="connectBtn">CONNECT BEAM</button>
+      <h2>Rulial Atlas 🌌</h2>
+      <div class="legend">
+        <div>
+          <span class="dot" style="background: #ffd700"></span> Gold Filaments
+          (Class 4 / Life)
+        </div>
+        <div>
+          <span class="dot" style="background: #ff0000"></span> Fire (Class 3 /
+          Chaos)
+        </div>
+        <div>
+          <span class="dot" style="background: #0088ff"></span> Ice (Class 1/2 /
+          Frozen)
+        </div>
+        <div><span class="dot" style="background: #444"></span> Unknown</div>
       </div>
-      <div id="status">Status: Offline</div>
-      <div id="stats">FPS: 0 | Voxels: 0</div>
+      <div>
+        <br />
+        <strong>Stats:</strong> <span id="map-stats">Loading...</span><br />
+        <small>Click a star to simulate.</small>
+      </div>
     </div>
+
+    <!-- Simulation UI (Hidden) -->
+    <div id="sim-ui">
+      <h3>Simulation View</h3>
+      <div id="active-rule">Rule: UNKNOWN</div>
+      <button id="backBtn">⬅ Return to Atlas</button>
+      <div id="sim-stats">FPS: 0 | Voxels: 0</div>
+    </div>
+
+    <div id="tooltip"></div>
 
     <script type="module">
       import * as THREE from "three";
       import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-      // Config
+      // --- CONFIG ---
       const GRID_SIZE = 64;
-      const MAX_HISTORY = 200; // How many frames to keep in 3D buffer
+      const MAX_HISTORY = 200;
 
+      // --- STATE ---
       let scene, camera, renderer, controls;
-      let particleSystem;
-      let positions = []; // Flat array of [x, y, z]
-      let socket;
-
-      // State
-      let universeHistory = []; // Array of Uint8Arrays (frames)
-      let frameCount = 0;
+      let atlasPoints, hoverHighlight;
+      let particleSystem; // For simulation
+      let raycaster = new THREE.Raycaster();
+      let mouse = new THREE.Vector2();
+      let historyData = [];
+      let ruleMap = {}; // rule_id -> data
+      let socket = null;
+      let universeHistory = [];
+      let mode = "ATLAS"; // ATLAS or SIM
 
       init();
+      loadAtlas();
       animate();
 
       function init() {
-        // Scene
         scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x000000, 0.002);
+        scene.fog = new THREE.FogExp2(0x050505, 0.02); // Deep space fog
 
-        // Camera
         camera = new THREE.PerspectiveCamera(
           75,
           window.innerWidth / window.innerHeight,
           0.1,
           1000,
         );
-        camera.position.set(30, 30, 60);
+        camera.position.set(0, 0, 120);
 
-        // Renderer
         renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Controls
         controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.autoRotate = true;
+        controls.autoRotate = false; // User requested stop
         controls.autoRotateSpeed = 0.5;
 
-        // Geom
-        // We use a Point Cloud for Voxels (Performance)
+        // Interaction
+        window.addEventListener("resize", onWindowResize);
+        window.addEventListener("mousemove", onMouseMove);
+        window.addEventListener("click", onClick);
+        document
+          .getElementById("backBtn")
+          .addEventListener("click", closeSimulation);
+
+        // Atlas container
+        atlasPoints = new THREE.Group();
+        scene.add(atlasPoints);
+
+        // Hover Highlight
+        const geom = new THREE.RingGeometry(0.2, 0.3, 32);
+        const mat = new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          side: THREE.DoubleSide,
+        });
+        hoverHighlight = new THREE.Mesh(geom, mat);
+        hoverHighlight.visible = false;
+        scene.add(hoverHighlight);
+
+        // Helper Axes (Optional)
+        // const axesHelper = new THREE.AxesHelper(5);
+        // scene.add(axesHelper);
+      }
+
+      async function loadAtlas() {
+        try {
+          const res = await fetch("/atlas/history");
+          const data = await res.json();
+          historyData = data;
+
+          buildStarChart(data);
+        } catch (e) {
+          console.error("Failed to load atlas:", e);
+          document.getElementById("map-stats").textContent =
+            "Error loading data.";
+        }
+      }
+
+      function buildStarChart(data) {
+        // Clear old
+        while (atlasPoints.children.length > 0) {
+          atlasPoints.remove(atlasPoints.children[0]);
+        }
+
         const geometry = new THREE.BufferGeometry();
-        // Initial buffer size (MAX_HISTORY * GRID_SIZE^2 is upper bound)
+        const positions = [];
+        const colors = [];
+        const sizes = [];
+
+        let count4 = 0;
+
+        data.forEach((item) => {
+          // 2D ATLAS MAPPING
+          // X = Born Bits (0-511)
+          // Y = Survive Bits (0-511)
+          // Scale to world coordinates (-50 to 50)
+
+          const xVal = item.x || 0;
+          const yVal = item.y || 0;
+
+          const x = (xVal / 512.0) * 100 - 50;
+          const y = (yVal / 512.0) * 100 - 50;
+          const z = 0; // Flat map
+
+          positions.push(x, y, z);
+
+          // Color & Size
+          const wClass = item.wolfram_class || 0;
+          const color = new THREE.Color();
+
+          if (wClass === 4) {
+            color.setHex(0xffd700); // Gold
+            sizes.push(1.5); // Prominent
+            count4++;
+          } else if (wClass === 3) {
+            color.setHex(0xff0000); // Red
+            sizes.push(0.6);
+          } else if (wClass === 1 || wClass === 2) {
+            color.setHex(0x0088ff); // Blue
+            sizes.push(0.6);
+          } else {
+            color.setHex(0x444444); // Grey
+            sizes.push(0.4);
+          }
+
+          colors.push(color.r, color.g, color.b);
+
+          // Store map reference
+          item.mapX = x;
+          item.mapY = y;
+          ruleMap[`${xVal},${yVal}`] = item;
+          // Also map by rule string if needed
+        });
+
+        // Update Stats
+        document.getElementById("map-stats").textContent =
+          `Mapped: ${data.length} | Gold Filaments: ${count4}`;
+
+        geometry.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(positions, 3),
+        );
+        geometry.setAttribute(
+          "color",
+          new THREE.Float32BufferAttribute(colors, 3),
+        );
+        geometry.setAttribute(
+          "size",
+          new THREE.Float32BufferAttribute(sizes, 1),
+        );
+
+        // Shader Material for Points
+        // Standard PointsMaterial doesn't support per-vertex size easily without shader mod,
+        // but let's stick to standard for simplicity and avg size.
+        // Actually, let's just use fixed size for MVP to avoid shader complexity
+        const material = new THREE.PointsMaterial({
+          size: 0.2,
+          vertexColors: true,
+          transparent: true,
+          opacity: 0.9,
+        });
+
+        const points = new THREE.Points(geometry, material);
+        points.userData = { isAtlas: true, rules: data }; // Store ref
+        atlasPoints.add(points);
+
+        document.getElementById("map-stats").textContent =
+          `Rules Mapped: ${data.length} | Filaments: ${count4}`;
+      }
+
+      function onMouseMove(event) {
+        if (mode !== "ATLAS") return;
+
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+
+        // Raycast against points is tricky because they are small.
+        // We use a threshold
+        raycaster.params.Points.threshold = 0.5;
+
+        const intersects = raycaster.intersectObjects(atlasPoints.children);
+        const tooltip = document.getElementById("tooltip");
+
+        if (intersects.length > 0) {
+          const hit = intersects[0];
+          const index = hit.index;
+          // Get data from geometry
+          // Wait, we need the original data array.
+          // We populated points in order.
+          const ruleData = historyData[index];
+
+          if (ruleData) {
+            hoverHighlight.position.copy(hit.point);
+            hoverHighlight.visible = true;
+            hoverHighlight.lookAt(camera.position); // Billboard
+
+            tooltip.style.display = "block";
+            tooltip.style.left = event.clientX + 10 + "px";
+            tooltip.style.top = event.clientY + 10 + "px";
+            tooltip.innerHTML = `
+                    <strong>Rule ${ruleData.rule_str}</strong><br>
+                    Born: ${ruleData.x} / Survive: ${ruleData.y}<br>
+                    <hr>
+                    Class: <span style="color:${
+                      ruleData.wolfram_class === 4 ? "gold" : "white"
+                    }">${ruleData.wolfram_class}</span><br>
+                    Betti-1: ${ruleData.betti_1}<br>
+                    Comp Ratio: ${ruleData.compression_ratio?.toFixed(4)}
+                `;
+            document.body.style.cursor = "pointer";
+          }
+        } else {
+          hoverHighlight.visible = false;
+          tooltip.style.display = "none";
+          document.body.style.cursor = "default";
+        }
+      }
+
+      function onClick(event) {
+        if (mode !== "ATLAS") return;
+
+        // Re-run raycast
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(atlasPoints.children);
+
+        if (intersects.length > 0) {
+          const index = intersects[0].index;
+          const ruleData = historyData[index];
+          if (ruleData) {
+            // Just log the rule info - no simulation animation
+            const ruleId = ruleData.rule_id || ruleData.rule;
+            console.log("Selected Rule:", ruleId, ruleData);
+            alert(
+              `Rule ${ruleId}\nClass: ${ruleData.wolfram_class}\nBetti_1: ${ruleData.betti_1}\nCompression Progress: ${ruleData.compression_progress?.toFixed(6)}`,
+            );
+          }
+        }
+      }
+
+      function startSimulation(ruleId) {
+        mode = "SIM";
+
+        // 1. Hide Atlas
+        atlasPoints.visible = false;
+        document.getElementById("ui").style.display = "none";
+        document.getElementById("tooltip").style.display = "none";
+
+        // 2. Show Sim UI
+        document.getElementById("sim-ui").style.display = "block";
+        document.getElementById("active-rule").textContent = `Rule: ${ruleId}`;
+
+        // 3. Reset Camera for Sim
+        controls.autoRotate = false;
+        controls.reset();
+        camera.position.set(40, 40, 80);
+        camera.lookAt(0, 0, 0);
+
+        // 4. Init Sim Rendering
+        if (!particleSystem) initSimParticles();
+        particleSystem.visible = true;
+
+        // 5. Connect WebSocket
+        connectWS(ruleId);
+      }
+
+      function closeSimulation() {
+        mode = "ATLAS";
+
+        // 1. Close WS
+        if (socket) socket.close();
+
+        // 2. Hide Sim
+        particleSystem.visible = false;
+        document.getElementById("sim-ui").style.display = "none";
+
+        // 3. Show Atlas
+        atlasPoints.visible = true;
+        document.getElementById("ui").style.display = "block";
+
+        // 4. Reset Camera
+        controls.autoRotate = false;
+        camera.position.set(10, 10, 20);
+      }
+
+      function initSimParticles() {
+        const geometry = new THREE.BufferGeometry();
         const maxPoints = MAX_HISTORY * GRID_SIZE * GRID_SIZE;
         const posArray = new Float32Array(maxPoints * 3);
         geometry.setAttribute(
@@ -120,7 +407,6 @@
           new THREE.BufferAttribute(posArray, 3),
         );
 
-        // Material
         const material = new THREE.PointsMaterial({
           color: 0x00ff88,
           size: 0.6,
@@ -132,10 +418,7 @@
         particleSystem = new THREE.Points(geometry, material);
         scene.add(particleSystem);
 
-        // Helpers
-        const axesHelper = new THREE.AxesHelper(10);
-        scene.add(axesHelper);
-
+        // Add Grid Helper for Sim
         const gridHelper = new THREE.GridHelper(
           GRID_SIZE,
           10,
@@ -146,99 +429,49 @@
           GRID_SIZE / 2 - 0.5,
           -MAX_HISTORY / 2,
           GRID_SIZE / 2 - 0.5,
-        ); // Center vaguely
-        scene.add(gridHelper);
-
-        // Events
-        window.addEventListener("resize", onWindowResize);
-        document
-          .getElementById("connectBtn")
-          .addEventListener("click", connect);
+        );
+        particleSystem.add(gridHelper); // Attach to sys so it hides with it
       }
 
-      function connect() {
-        const rule = document.getElementById("ruleInput").value;
-        const status = document.getElementById("status");
-
-        if (socket) socket.close();
-
-        status.textContent = `Connecting to ${rule}...`;
-        status.style.color = "yellow";
-
-        // Clear history
+      function connectWS(rule) {
         universeHistory = [];
-
-        // WS
         const proto = window.location.protocol === "https:" ? "wss" : "ws";
-        const url = `${proto}://${window.location.host}/stream/${encodeURIComponent(rule)}`;
+        const url = `${proto}://${window.location.host}/stream?rule=${encodeURIComponent(rule)}`;
 
         socket = new WebSocket(url);
         socket.binaryType = "arraybuffer";
 
-        socket.onopen = () => {
-          status.textContent = "CONNECTED: STREAMING DATA";
-          status.style.color = "#0f0";
-        };
-
+        socket.onimage = () => console.log("Stream connected");
         socket.onmessage = (event) => {
-          // Incoming binary frame (64x64 bytes)
           const frame = new Uint8Array(event.data);
-
-          // Add to history
           universeHistory.push(frame);
-          if (universeHistory.length > MAX_HISTORY) {
-            universeHistory.shift(); // Remove oldest
-          }
-
+          if (universeHistory.length > MAX_HISTORY) universeHistory.shift();
           updateVoxels();
-          frameCount++;
-        };
-
-        socket.onclose = (e) => {
-          status.textContent = `DISCONNECTED (${e.code})`;
-          status.style.color = "red";
         };
       }
 
       function updateVoxels() {
-        // Rebuild particle buffer from history
-        // Z axis = Time
-
+        if (!particleSystem) return;
         const positions = particleSystem.geometry.attributes.position.array;
         let ptr = 0;
-
-        // Render oldest at Z=0 (bottom) to newest at Z=MAX_HISTORY (top)
-        // Or center it. Let's make Z=0 be 'Now' and history goes down?
-        // Actually, let's stack them up.
-
-        // universeHistory[0] is oldest.
-
         const zOffset = -universeHistory.length / 2;
 
         for (let t = 0; t < universeHistory.length; t++) {
           const grid = universeHistory[t];
-          // Grid is 64x64 flattened
           for (let i = 0; i < grid.length; i++) {
             if (grid[i] === 1) {
-              // Alive
               const y = Math.floor(i / GRID_SIZE);
               const x = i % GRID_SIZE;
-
               positions[ptr++] = x;
-              positions[ptr++] = t + zOffset; // Time is the vertical axis here? usually Y in ThreeJS?
-              // Let's map:
-              // X = x, Y = time (t), Z = y (row)
-              // Actually standard is Y up. So Time = Y.
+              positions[ptr++] = t + zOffset; // Y is UP (Time)
               positions[ptr++] = y;
             }
           }
         }
-
         particleSystem.geometry.setDrawRange(0, ptr / 3);
         particleSystem.geometry.attributes.position.needsUpdate = true;
-
-        document.getElementById("stats").textContent =
-          `Frames: ${frameCount} | Voxels: ${ptr / 3}`;
+        document.getElementById("sim-stats").textContent =
+          `Frames: ${universeHistory.length} | Voxels: ${ptr / 3}`;
       }
 
       function onWindowResize() {

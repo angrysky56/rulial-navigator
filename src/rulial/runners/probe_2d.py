@@ -169,6 +169,46 @@ class RulialProbe2D:
                 )
                 next_rule = bits_to_int(next_rule_vec)
 
+                # --- Derived Metrics for Classification ---
+                # 1. Dynamism (Pixel Delta) derived from last 2 frames
+                # We need the second to last frame.
+                if len(grid_history) > 1:
+                    last_frame = grid_history[-1].astype(int)
+                    prev_frame = grid_history[-2].astype(int)
+                    dynamism = np.sum(np.abs(last_frame - prev_frame))
+                else:
+                    dynamism = 0
+
+                # 2. Population (Active Cells)
+                active_cells = np.sum(full_grid)
+
+                # 3. Compression Ratio (Quick check using LZMA)
+                import lzma
+
+                # Pack grid to bytes for compression
+                grid_bytes = full_grid.tobytes()
+                compressed = lzma.compress(grid_bytes)
+                compression_ratio = len(compressed) / len(grid_bytes)
+
+                # 4. Wolfram Class Inference (Heuristic)
+                wolfram_class = 0
+                if entropy < 0.0:
+                    wolfram_class = 3  # Chaos/Volume Law
+                elif dynamism == 0:
+                    wolfram_class = 1  # Frozen / Still Life (Class 1 or 2 depending on if it has structure, but mostly 1/2)
+                elif dynamism < 20 and active_cells > 0:
+                    # Low dynamism but not zero -> Simple Oscillator?
+                    wolfram_class = 2  # Periodic
+                elif entropy > 3.0:
+                    wolfram_class = 3  # High entropy fire
+                elif 0.1 <= entropy <= 3.0:
+                    wolfram_class = 4  # Complex / Liquid
+
+                # Refine Class 2 vs 4 based on "Boring Oscillation" vs "Walking"
+                # If compression is extremely high (<0.05) it's likely Class 2/1
+                if compression_ratio < 0.05 and wolfram_class == 4:
+                    wolfram_class = 2  # Downgrade to Periodic if too simple
+
                 # --- Visualization Update ---
                 record = {
                     "rule": int(self.current_rule),
@@ -177,7 +217,12 @@ class RulialProbe2D:
                     "surprise": float(surprise),
                     "pred": float(pred_entropy),
                     "epoch": epoch,
-                    "cam": (target_y, target_x),  # Log camera pos
+                    "cam": (int(target_y), int(target_x)),  # Log camera pos
+                    # NEW METADATA
+                    "wolfram_class": int(wolfram_class),
+                    "dynamism": int(dynamism),
+                    "active_cells": int(active_cells),
+                    "compression_ratio": float(compression_ratio),
                 }
                 self.history.append(record)
 

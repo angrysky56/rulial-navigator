@@ -1,0 +1,1602 @@
+[
+  {
+    "x": 273,
+    "y": 398,
+    "rule_str": "B048/S12378",
+    "wolfram_class": 3,
+    "compression_ratio": 0.072236328125,
+    "betti_1": 16
+  },
+  {
+    "x": 355,
+    "y": 400,
+    "rule_str": "B01568/S478",
+    "wolfram_class": 1,
+    "compression_ratio": 0.000322265625,
+    "betti_1": 0
+  },
+  {
+    "x": 309,
+    "y": 247,
+    "rule_str": "B02458/S0124567",
+    "wolfram_class": 2,
+    "compression_ratio": 0.0072412109375,
+    "betti_1": 9
+  },
+  {
+    "x": 42,
+    "y": 193,
+    "rule_str": "B135/S067",
+    "wolfram_class": 3,
+    "compression_ratio": 0.04119140625,
+    "betti_1": 12
+  },
+  {
+    "x": 392,
+    "y": 412,
+    "rule_str": "B378/S23478",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 422,
+    "y": 428,
+    "rule_str": "B12578/S23578",
+    "wolfram_class": 3,
+    "compression_ratio": 0.08017578125,
+    "betti_1": 11
+  },
+  {
+    "x": 321,
+    "y": 25,
+    "rule_str": "B068/S034",
+    "wolfram_class": 1,
+    "compression_ratio": 0.000400390625,
+    "betti_1": 0
+  },
+  {
+    "x": 185,
+    "y": 409,
+    "rule_str": "B03457/S03478",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0758203125,
+    "betti_1": 8
+  },
+  {
+    "x": 296,
+    "y": 146,
+    "rule_str": "B358/S147",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 107,
+    "y": 44,
+    "rule_str": "B01356/S235",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004833984375,
+    "betti_1": 0
+  },
+  {
+    "x": 359,
+    "y": 244,
+    "rule_str": "B012568/S24567",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0649853515625,
+    "betti_1": 6
+  },
+  {
+    "x": 449,
+    "y": 206,
+    "rule_str": "B0678/S12367",
+    "wolfram_class": 2,
+    "compression_ratio": 0.00390625,
+    "betti_1": 5
+  },
+  {
+    "x": 98,
+    "y": 460,
+    "rule_str": "B156/S23678",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0756884765625,
+    "betti_1": 18
+  },
+  {
+    "x": 338,
+    "y": 139,
+    "rule_str": "B1468/S0137",
+    "wolfram_class": 3,
+    "compression_ratio": 0.077509765625,
+    "betti_1": 9
+  },
+  {
+    "x": 220,
+    "y": 434,
+    "rule_str": "B23467/S14578",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 110,
+    "y": 234,
+    "rule_str": "B12356/S13567",
+    "wolfram_class": 3,
+    "compression_ratio": 0.01990234375,
+    "betti_1": 6
+  },
+  {
+    "x": 298,
+    "y": 363,
+    "rule_str": "B1358/S013568",
+    "wolfram_class": 3,
+    "compression_ratio": 0.07828125,
+    "betti_1": 11
+  },
+  {
+    "x": 387,
+    "y": 92,
+    "rule_str": "B0178/S2346",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0010302734375,
+    "betti_1": 7
+  },
+  {
+    "x": 216,
+    "y": 218,
+    "rule_str": "B3467/S13467",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 36,
+    "y": 285,
+    "rule_str": "B25/S02348",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 117,
+    "y": 232,
+    "rule_str": "B02456/S3567",
+    "wolfram_class": 3,
+    "compression_ratio": 0.01212890625,
+    "betti_1": 9
+  },
+  {
+    "x": 343,
+    "y": 94,
+    "rule_str": "B012468/S12346",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0010302734375,
+    "betti_1": 17
+  },
+  {
+    "x": 300,
+    "y": 260,
+    "rule_str": "B2358/S28",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 267,
+    "y": 50,
+    "rule_str": "B0138/S145",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0010302734375,
+    "betti_1": 7
+  },
+  {
+    "x": 58,
+    "y": 360,
+    "rule_str": "B1345/S3568",
+    "wolfram_class": 3,
+    "compression_ratio": 0.07796875,
+    "betti_1": 11
+  },
+  {
+    "x": 460,
+    "y": 314,
+    "rule_str": "B23678/S13458",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 90,
+    "y": 381,
+    "rule_str": "B1346/S0234568",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0132470703125,
+    "betti_1": 13
+  },
+  {
+    "x": 489,
+    "y": 469,
+    "rule_str": "B035678/S024678",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003515625,
+    "betti_1": 0
+  },
+  {
+    "x": 421,
+    "y": 26,
+    "rule_str": "B02578/S134",
+    "wolfram_class": 3,
+    "compression_ratio": 0.071640625,
+    "betti_1": 6
+  },
+  {
+    "x": 428,
+    "y": 89,
+    "rule_str": "B23578/S0346",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 421,
+    "y": 182,
+    "rule_str": "B02578/S12457",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0801904296875,
+    "betti_1": 11
+  },
+  {
+    "x": 72,
+    "y": 336,
+    "rule_str": "B36/S468",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 224,
+    "y": 18,
+    "rule_str": "B567/S14",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 140,
+    "y": 391,
+    "rule_str": "B237/S01278",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 236,
+    "y": 308,
+    "rule_str": "B23567/S2458",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 291,
+    "y": 398,
+    "rule_str": "B0158/S12378",
+    "wolfram_class": 1,
+    "compression_ratio": 0.000322265625,
+    "betti_1": 0
+  },
+  {
+    "x": 192,
+    "y": 363,
+    "rule_str": "B67/S013568",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 367,
+    "y": 372,
+    "rule_str": "B0123568/S24568",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0681103515625,
+    "betti_1": 9
+  },
+  {
+    "x": 94,
+    "y": 288,
+    "rule_str": "B12346/S58",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0799365234375,
+    "betti_1": 6
+  },
+  {
+    "x": 288,
+    "y": 208,
+    "rule_str": "B58/S467",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 35,
+    "y": 329,
+    "rule_str": "B015/S0368",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 146,
+    "y": 121,
+    "rule_str": "B147/S03456",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0698388671875,
+    "betti_1": 16
+  },
+  {
+    "x": 496,
+    "y": 178,
+    "rule_str": "B45678/S1457",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 370,
+    "y": 98,
+    "rule_str": "B14568/S156",
+    "wolfram_class": 3,
+    "compression_ratio": 0.059755859375,
+    "betti_1": 12
+  },
+  {
+    "x": 223,
+    "y": 474,
+    "rule_str": "B0123467/S134678",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003271484375,
+    "betti_1": 0
+  },
+  {
+    "x": 487,
+    "y": 431,
+    "rule_str": "B0125678/S0123578",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 198,
+    "y": 219,
+    "rule_str": "B1267/S013467",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0794091796875,
+    "betti_1": 10
+  },
+  {
+    "x": 305,
+    "y": 332,
+    "rule_str": "B0458/S2368",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0784716796875,
+    "betti_1": 15
+  },
+  {
+    "x": 249,
+    "y": 87,
+    "rule_str": "B034567/S01246",
+    "wolfram_class": 3,
+    "compression_ratio": 0.077646484375,
+    "betti_1": 7
+  },
+  {
+    "x": 115,
+    "y": 326,
+    "rule_str": "B01456/S1268",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0795166015625,
+    "betti_1": 6
+  },
+  {
+    "x": 200,
+    "y": 266,
+    "rule_str": "B367/S138",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 258,
+    "y": 395,
+    "rule_str": "B18/S01378",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0132373046875,
+    "betti_1": 14
+  },
+  {
+    "x": 155,
+    "y": 103,
+    "rule_str": "B01347/S01256",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004736328125,
+    "betti_1": 0
+  },
+  {
+    "x": 391,
+    "y": 248,
+    "rule_str": "B01278/S34567",
+    "wolfram_class": 2,
+    "compression_ratio": 0.0048388671875,
+    "betti_1": 4
+  },
+  {
+    "x": 299,
+    "y": 123,
+    "rule_str": "B01358/S013456",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004736328125,
+    "betti_1": 0
+  },
+  {
+    "x": 92,
+    "y": 10,
+    "rule_str": "B2346/S13",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 104,
+    "y": 68,
+    "rule_str": "B356/S26",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 441,
+    "y": 341,
+    "rule_str": "B034578/S02468",
+    "wolfram_class": 3,
+    "compression_ratio": 0.07720703125,
+    "betti_1": 9
+  },
+  {
+    "x": 96,
+    "y": 427,
+    "rule_str": "B56/S013578",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 334,
+    "y": 10,
+    "rule_str": "B12368/S13",
+    "wolfram_class": 3,
+    "compression_ratio": 0.07400390625,
+    "betti_1": 8
+  },
+  {
+    "x": 165,
+    "y": 253,
+    "rule_str": "B0257/S0234567",
+    "wolfram_class": 2,
+    "compression_ratio": 0.005517578125,
+    "betti_1": 9
+  },
+  {
+    "x": 245,
+    "y": 284,
+    "rule_str": "B024567/S2348",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0777197265625,
+    "betti_1": 12
+  },
+  {
+    "x": 19,
+    "y": 96,
+    "rule_str": "B014/S56",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004833984375,
+    "betti_1": 0
+  },
+  {
+    "x": 354,
+    "y": 274,
+    "rule_str": "B1568/S148",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0717529296875,
+    "betti_1": 11
+  },
+  {
+    "x": 373,
+    "y": 66,
+    "rule_str": "B024568/S16",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0432666015625,
+    "betti_1": 8
+  },
+  {
+    "x": 65,
+    "y": 260,
+    "rule_str": "B06/S28",
+    "wolfram_class": 3,
+    "compression_ratio": 0.040341796875,
+    "betti_1": 28
+  },
+  {
+    "x": 440,
+    "y": 44,
+    "rule_str": "B34578/S235",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 216,
+    "y": 462,
+    "rule_str": "B3467/S123678",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 350,
+    "y": 170,
+    "rule_str": "B123468/S1357",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0775537109375,
+    "betti_1": 12
+  },
+  {
+    "x": 409,
+    "y": 340,
+    "rule_str": "B03478/S2468",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0786962890625,
+    "betti_1": 12
+  },
+  {
+    "x": 205,
+    "y": 389,
+    "rule_str": "B02367/S0278",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0746484375,
+    "betti_1": 21
+  },
+  {
+    "x": 358,
+    "y": 313,
+    "rule_str": "B12568/S03458",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0786181640625,
+    "betti_1": 10
+  },
+  {
+    "x": 43,
+    "y": 365,
+    "rule_str": "B0135/S023568",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 448,
+    "y": 194,
+    "rule_str": "B678/S167",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 508,
+    "y": 333,
+    "rule_str": "B2345678/S02368",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 129,
+    "y": 278,
+    "rule_str": "B07/S1248",
+    "wolfram_class": 2,
+    "compression_ratio": 0.002587890625,
+    "betti_1": 11
+  },
+  {
+    "x": 369,
+    "y": 253,
+    "rule_str": "B04568/S0234567",
+    "wolfram_class": 3,
+    "compression_ratio": 0.017294921875,
+    "betti_1": 10
+  },
+  {
+    "x": 244,
+    "y": 248,
+    "rule_str": "B24567/S34567",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 153,
+    "y": 103,
+    "rule_str": "B0347/S01256",
+    "wolfram_class": 3,
+    "compression_ratio": 0.08,
+    "betti_1": 6
+  },
+  {
+    "x": 494,
+    "y": 379,
+    "rule_str": "B1235678/S0134568",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0548583984375,
+    "betti_1": 15
+  },
+  {
+    "x": 423,
+    "y": 438,
+    "rule_str": "B012578/S124578",
+    "wolfram_class": 1,
+    "compression_ratio": 0.000322265625,
+    "betti_1": 0
+  },
+  {
+    "x": 426,
+    "y": 54,
+    "rule_str": "B13578/S1245",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0784912109375,
+    "betti_1": 11
+  },
+  {
+    "x": 251,
+    "y": 142,
+    "rule_str": "B0134567/S1237",
+    "wolfram_class": 3,
+    "compression_ratio": 0.07595703125,
+    "betti_1": 8
+  },
+  {
+    "x": 123,
+    "y": 299,
+    "rule_str": "B013456/S01358",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 350,
+    "y": 3,
+    "rule_str": "B123468/S01",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0317626953125,
+    "betti_1": 12
+  },
+  {
+    "x": 0,
+    "y": 126,
+    "rule_str": "B/S123456",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 14,
+    "y": 79,
+    "rule_str": "B123/S01236",
+    "wolfram_class": 3,
+    "compression_ratio": 0.073994140625,
+    "betti_1": 9
+  },
+  {
+    "x": 220,
+    "y": 352,
+    "rule_str": "B23467/S568",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 264,
+    "y": 504,
+    "rule_str": "B38/S345678",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 459,
+    "y": 189,
+    "rule_str": "B013678/S023457",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004736328125,
+    "betti_1": 0
+  },
+  {
+    "x": 449,
+    "y": 135,
+    "rule_str": "B0678/S0127",
+    "wolfram_class": 2,
+    "compression_ratio": 0.0031298828125,
+    "betti_1": 11
+  },
+  {
+    "x": 116,
+    "y": 265,
+    "rule_str": "B2456/S038",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 138,
+    "y": 287,
+    "rule_str": "B137/S012348",
+    "wolfram_class": 2,
+    "compression_ratio": 0.0094189453125,
+    "betti_1": 16
+  },
+  {
+    "x": 242,
+    "y": 33,
+    "rule_str": "B14567/S05",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0204296875,
+    "betti_1": 15
+  },
+  {
+    "x": 117,
+    "y": 331,
+    "rule_str": "B02456/S01368",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0800732421875,
+    "betti_1": 17
+  },
+  {
+    "x": 364,
+    "y": 152,
+    "rule_str": "B23568/S347",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 167,
+    "y": 162,
+    "rule_str": "B01257/S157",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0758251953125,
+    "betti_1": 12
+  },
+  {
+    "x": 273,
+    "y": 494,
+    "rule_str": "B048/S1235678",
+    "wolfram_class": 1,
+    "compression_ratio": 0.000361328125,
+    "betti_1": 0
+  },
+  {
+    "x": 301,
+    "y": 162,
+    "rule_str": "B02358/S157",
+    "wolfram_class": 3,
+    "compression_ratio": 0.079951171875,
+    "betti_1": 7
+  },
+  {
+    "x": 103,
+    "y": 99,
+    "rule_str": "B01256/S0156",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004736328125,
+    "betti_1": 0
+  },
+  {
+    "x": 280,
+    "y": 270,
+    "rule_str": "B348/S1238",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 62,
+    "y": 424,
+    "rule_str": "B12345/S3578",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0780908203125,
+    "betti_1": 18
+  },
+  {
+    "x": 262,
+    "y": 145,
+    "rule_str": "B128/S047",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0754833984375,
+    "betti_1": 7
+  },
+  {
+    "x": 356,
+    "y": 348,
+    "rule_str": "B2568/S23468",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 174,
+    "y": 510,
+    "rule_str": "B12357/S12345678",
+    "wolfram_class": 2,
+    "compression_ratio": 0.0020263671875,
+    "betti_1": 8
+  },
+  {
+    "x": 451,
+    "y": 117,
+    "rule_str": "B01678/S02456",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004736328125,
+    "betti_1": 0
+  },
+  {
+    "x": 39,
+    "y": 196,
+    "rule_str": "B0125/S267",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0753369140625,
+    "betti_1": 9
+  },
+  {
+    "x": 27,
+    "y": 212,
+    "rule_str": "B0134/S2467",
+    "wolfram_class": 3,
+    "compression_ratio": 0.079541015625,
+    "betti_1": 6
+  },
+  {
+    "x": 485,
+    "y": 237,
+    "rule_str": "B025678/S023567",
+    "wolfram_class": 3,
+    "compression_ratio": 0.06947265625,
+    "betti_1": 10
+  },
+  {
+    "x": 335,
+    "y": 498,
+    "rule_str": "B012368/S145678",
+    "wolfram_class": 1,
+    "compression_ratio": 0.000322265625,
+    "betti_1": 0
+  },
+  {
+    "x": 295,
+    "y": 395,
+    "rule_str": "B01258/S01378",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 137,
+    "y": 384,
+    "rule_str": "B037/S78",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0652978515625,
+    "betti_1": 50
+  },
+  {
+    "x": 173,
+    "y": 441,
+    "rule_str": "B02357/S034578",
+    "wolfram_class": 3,
+    "compression_ratio": 0.068740234375,
+    "betti_1": 10
+  },
+  {
+    "x": 172,
+    "y": 17,
+    "rule_str": "B2357/S04",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 183,
+    "y": 366,
+    "rule_str": "B012457/S123568",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0755322265625,
+    "betti_1": 12
+  },
+  {
+    "x": 162,
+    "y": 353,
+    "rule_str": "B157/S0568",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0635595703125,
+    "betti_1": 12
+  },
+  {
+    "x": 17,
+    "y": 177,
+    "rule_str": "B04/S0457",
+    "wolfram_class": 3,
+    "compression_ratio": 0.071123046875,
+    "betti_1": 11
+  },
+  {
+    "x": 366,
+    "y": 322,
+    "rule_str": "B123568/S168",
+    "wolfram_class": 3,
+    "compression_ratio": 0.079169921875,
+    "betti_1": 7
+  },
+  {
+    "x": 131,
+    "y": 21,
+    "rule_str": "B017/S024",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004736328125,
+    "betti_1": 0
+  },
+  {
+    "x": 408,
+    "y": 390,
+    "rule_str": "B3478/S1278",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 125,
+    "y": 144,
+    "rule_str": "B023456/S47",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0792919921875,
+    "betti_1": 5
+  },
+  {
+    "x": 357,
+    "y": 389,
+    "rule_str": "B02568/S0278",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0740283203125,
+    "betti_1": 15
+  },
+  {
+    "x": 191,
+    "y": 22,
+    "rule_str": "B0123457/S124",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004833984375,
+    "betti_1": 0
+  },
+  {
+    "x": 339,
+    "y": 221,
+    "rule_str": "B01468/S023467",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004736328125,
+    "betti_1": 0
+  },
+  {
+    "x": 482,
+    "y": 208,
+    "rule_str": "B15678/S467",
+    "wolfram_class": 3,
+    "compression_ratio": 0.06796875,
+    "betti_1": 10
+  },
+  {
+    "x": 197,
+    "y": 224,
+    "rule_str": "B0267/S567",
+    "wolfram_class": 3,
+    "compression_ratio": 0.07412109375,
+    "betti_1": 13
+  },
+  {
+    "x": 47,
+    "y": 217,
+    "rule_str": "B01235/S03467",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004736328125,
+    "betti_1": 0
+  },
+  {
+    "x": 420,
+    "y": 399,
+    "rule_str": "B2578/S012378",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 414,
+    "y": 200,
+    "rule_str": "B123478/S367",
+    "wolfram_class": 3,
+    "compression_ratio": 0.078876953125,
+    "betti_1": 10
+  },
+  {
+    "x": 168,
+    "y": 48,
+    "rule_str": "B357/S45",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 145,
+    "y": 38,
+    "rule_str": "B047/S125",
+    "wolfram_class": 3,
+    "compression_ratio": 0.070830078125,
+    "betti_1": 4
+  },
+  {
+    "x": 269,
+    "y": 211,
+    "rule_str": "B0238/S01467",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0797900390625,
+    "betti_1": 4
+  },
+  {
+    "x": 246,
+    "y": 92,
+    "rule_str": "B124567/S2346",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0758447265625,
+    "betti_1": 14
+  },
+  {
+    "x": 209,
+    "y": 101,
+    "rule_str": "B0467/S0256",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0712255859375,
+    "betti_1": 18
+  },
+  {
+    "x": 414,
+    "y": 340,
+    "rule_str": "B123478/S2468",
+    "wolfram_class": 3,
+    "compression_ratio": 0.079228515625,
+    "betti_1": 5
+  },
+  {
+    "x": 6,
+    "y": 306,
+    "rule_str": "B12/S1458",
+    "wolfram_class": 3,
+    "compression_ratio": 0.07755859375,
+    "betti_1": 14
+  },
+  {
+    "x": 148,
+    "y": 336,
+    "rule_str": "B247/S468",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 208,
+    "y": 352,
+    "rule_str": "B467/S568",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 390,
+    "y": 386,
+    "rule_str": "B1278/S178",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0708203125,
+    "betti_1": 11
+  },
+  {
+    "x": 179,
+    "y": 74,
+    "rule_str": "B01457/S136",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004833984375,
+    "betti_1": 0
+  },
+  {
+    "x": 9,
+    "y": 93,
+    "rule_str": "B03/S02346",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0126611328125,
+    "betti_1": 8
+  },
+  {
+    "x": 209,
+    "y": 321,
+    "rule_str": "B0467/S068",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0679052734375,
+    "betti_1": 47
+  },
+  {
+    "x": 413,
+    "y": 218,
+    "rule_str": "B023478/S13467",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0778173828125,
+    "betti_1": 12
+  },
+  {
+    "x": 385,
+    "y": 407,
+    "rule_str": "B078/S012478",
+    "wolfram_class": 4,
+    "compression_ratio": 0.003544921875,
+    "betti_1": 55
+  },
+  {
+    "x": 506,
+    "y": 381,
+    "rule_str": "B1345678/S0234568",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0577685546875,
+    "betti_1": 11
+  },
+  {
+    "x": 94,
+    "y": 9,
+    "rule_str": "B12346/S03",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0668408203125,
+    "betti_1": 10
+  },
+  {
+    "x": 324,
+    "y": 440,
+    "rule_str": "B268/S34578",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 50,
+    "y": 179,
+    "rule_str": "B145/S01457",
+    "wolfram_class": 3,
+    "compression_ratio": 0.07994140625,
+    "betti_1": 20
+  },
+  {
+    "x": 167,
+    "y": 231,
+    "rule_str": "B01257/S012567",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004736328125,
+    "betti_1": 0
+  },
+  {
+    "x": 369,
+    "y": 147,
+    "rule_str": "B04568/S0147",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0345751953125,
+    "betti_1": 15
+  },
+  {
+    "x": 425,
+    "y": 488,
+    "rule_str": "B03578/S35678",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003271484375,
+    "betti_1": 0
+  },
+  {
+    "x": 439,
+    "y": 146,
+    "rule_str": "B0124578/S147",
+    "wolfram_class": 3,
+    "compression_ratio": 0.076630859375,
+    "betti_1": 5
+  },
+  {
+    "x": 291,
+    "y": 231,
+    "rule_str": "B0158/S012567",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004736328125,
+    "betti_1": 0
+  },
+  {
+    "x": 249,
+    "y": 13,
+    "rule_str": "B034567/S023",
+    "wolfram_class": 3,
+    "compression_ratio": 0.070517578125,
+    "betti_1": 4
+  },
+  {
+    "x": 469,
+    "y": 275,
+    "rule_str": "B024678/S0148",
+    "wolfram_class": 3,
+    "compression_ratio": 0.079404296875,
+    "betti_1": 12
+  },
+  {
+    "x": 271,
+    "y": 436,
+    "rule_str": "B01238/S24578",
+    "wolfram_class": 1,
+    "compression_ratio": 0.000322265625,
+    "betti_1": 0
+  },
+  {
+    "x": 422,
+    "y": 73,
+    "rule_str": "B12578/S036",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0779443359375,
+    "betti_1": 11
+  },
+  {
+    "x": 350,
+    "y": 327,
+    "rule_str": "B123468/S01268",
+    "wolfram_class": 3,
+    "compression_ratio": 0.077734375,
+    "betti_1": 11
+  },
+  {
+    "x": 72,
+    "y": 486,
+    "rule_str": "B36/S125678",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 187,
+    "y": 310,
+    "rule_str": "B013457/S12458",
+    "wolfram_class": 3,
+    "compression_ratio": 0.077255859375,
+    "betti_1": 11
+  },
+  {
+    "x": 392,
+    "y": 428,
+    "rule_str": "B378/S23578",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 445,
+    "y": 424,
+    "rule_str": "B0234578/S3578",
+    "wolfram_class": 1,
+    "compression_ratio": 0.000390625,
+    "betti_1": 0
+  },
+  {
+    "x": 359,
+    "y": 400,
+    "rule_str": "B012568/S478",
+    "wolfram_class": 1,
+    "compression_ratio": 0.000322265625,
+    "betti_1": 0
+  },
+  {
+    "x": 43,
+    "y": 24,
+    "rule_str": "B0135/S34",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004833984375,
+    "betti_1": 0
+  },
+  {
+    "x": 39,
+    "y": 7,
+    "rule_str": "B0125/S012",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004736328125,
+    "betti_1": 0
+  },
+  {
+    "x": 88,
+    "y": 459,
+    "rule_str": "B346/S013678",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 147,
+    "y": 172,
+    "rule_str": "B0147/S2357",
+    "wolfram_class": 3,
+    "compression_ratio": 0.078828125,
+    "betti_1": 6
+  },
+  {
+    "x": 401,
+    "y": 438,
+    "rule_str": "B0478/S124578",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0678955078125,
+    "betti_1": 14
+  },
+  {
+    "x": 383,
+    "y": 231,
+    "rule_str": "B01234568/S012567",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004736328125,
+    "betti_1": 0
+  },
+  {
+    "x": 444,
+    "y": 457,
+    "rule_str": "B234578/S03678",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 265,
+    "y": 129,
+    "rule_str": "B038/S07",
+    "wolfram_class": 3,
+    "compression_ratio": 0.070126953125,
+    "betti_1": 15
+  },
+  {
+    "x": 185,
+    "y": 410,
+    "rule_str": "B03457/S13478",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0757080078125,
+    "betti_1": 8
+  },
+  {
+    "x": 494,
+    "y": 279,
+    "rule_str": "B1235678/S01248",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0788134765625,
+    "betti_1": 13
+  },
+  {
+    "x": 218,
+    "y": 3,
+    "rule_str": "B13467/S01",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0788134765625,
+    "betti_1": 13
+  },
+  {
+    "x": 264,
+    "y": 12,
+    "rule_str": "B38/S23",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 455,
+    "y": 171,
+    "rule_str": "B012678/S01357",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004736328125,
+    "betti_1": 0
+  },
+  {
+    "x": 123,
+    "y": 359,
+    "rule_str": "B013456/S012568",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 429,
+    "y": 324,
+    "rule_str": "B023578/S268",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0798291015625,
+    "betti_1": 12
+  },
+  {
+    "x": 337,
+    "y": 439,
+    "rule_str": "B0468/S0124578",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0704443359375,
+    "betti_1": 16
+  },
+  {
+    "x": 3,
+    "y": 295,
+    "rule_str": "B01/S01258",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 50,
+    "y": 311,
+    "rule_str": "B145/S012458",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0797314453125,
+    "betti_1": 5
+  },
+  {
+    "x": 416,
+    "y": 21,
+    "rule_str": "B578/S024",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 102,
+    "y": 98,
+    "rule_str": "B1256/S156",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0783251953125,
+    "betti_1": 6
+  },
+  {
+    "x": 370,
+    "y": 505,
+    "rule_str": "B14568/S0345678",
+    "wolfram_class": 2,
+    "compression_ratio": 0.0034619140625,
+    "betti_1": 9
+  },
+  {
+    "x": 375,
+    "y": 188,
+    "rule_str": "B0124568/S23457",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0702685546875,
+    "betti_1": 10
+  },
+  {
+    "x": 27,
+    "y": 43,
+    "rule_str": "B0134/S0135",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004736328125,
+    "betti_1": 0
+  },
+  {
+    "x": 57,
+    "y": 47,
+    "rule_str": "B0345/S01235",
+    "wolfram_class": 3,
+    "compression_ratio": 0.07583984375,
+    "betti_1": 3
+  },
+  {
+    "x": 86,
+    "y": 201,
+    "rule_str": "B1246/S0367",
+    "wolfram_class": 3,
+    "compression_ratio": 0.067294921875,
+    "betti_1": 11
+  },
+  {
+    "x": 463,
+    "y": 193,
+    "rule_str": "B0123678/S067",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004736328125,
+    "betti_1": 0
+  },
+  {
+    "x": 149,
+    "y": 120,
+    "rule_str": "B0247/S3456",
+    "wolfram_class": 3,
+    "compression_ratio": 0.0685205078125,
+    "betti_1": 6
+  },
+  {
+    "x": 332,
+    "y": 160,
+    "rule_str": "B2368/S57",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 159,
+    "y": 34,
+    "rule_str": "B012347/S15",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0004833984375,
+    "betti_1": 0
+  },
+  {
+    "x": 212,
+    "y": 475,
+    "rule_str": "B2467/S0134678",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 160,
+    "y": 85,
+    "rule_str": "B57/S0246",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 448,
+    "y": 73,
+    "rule_str": "B678/S036",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 0,
+    "y": 465,
+    "rule_str": "B/S04678",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  },
+  {
+    "x": 429,
+    "y": 228,
+    "rule_str": "B023578/S2567",
+    "wolfram_class": 3,
+    "compression_ratio": 0.077021484375,
+    "betti_1": 5
+  },
+  {
+    "x": 64,
+    "y": 510,
+    "rule_str": "B6/S12345678",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003125,
+    "betti_1": 0
+  },
+  {
+    "x": 1,
+    "y": 346,
+    "rule_str": "B0/S13468",
+    "wolfram_class": 2,
+    "compression_ratio": 0.00748046875,
+    "betti_1": 35
+  },
+  {
+    "x": 183,
+    "y": 461,
+    "rule_str": "B012457/S023678",
+    "wolfram_class": 1,
+    "compression_ratio": 0.0003173828125,
+    "betti_1": 0
+  }
+]
