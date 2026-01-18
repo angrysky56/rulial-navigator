@@ -184,9 +184,9 @@ class UnifiedPipeline:
 
         print(f"Analyzing {rule_str}...")
 
-        # 1. Simulate
+        # 1. Simulate with sparse random (good for GoL-like rules)
         engine = Totalistic2DEngine(rule_str)
-        history = engine.simulate(64, 64, 200, "dense")
+        history = engine.simulate(64, 64, 300, "random", density=0.3)
         spacetime = np.stack(history, axis=0)
 
         # 2. Compression Metrics

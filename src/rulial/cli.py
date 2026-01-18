@@ -238,12 +238,18 @@ def entropy_flow(
     rule: str = typer.Option("B3/S23", help="Rule to analyze"),
 ):
     """
-    Analyze entropy flow direction for a rule.
-    """
-    from rulial.mapper.entropy_flow import EntropyFlowAnalyzer
+    Analyze compression flow for a rule (Maxwell's Demon for complexity).
 
-    console.print(f"[bold cyan]Analyzing entropy flow for {rule}...[/bold cyan]")
-    analyzer = EntropyFlowAnalyzer()
+    Uses bifurcated architecture:
+    - Layer 1: Rigid (LZMA) for exact patterns
+    - Layer 2: Neural for soft patterns
+
+    Outputs: FRUSTRATION (chaos), BOREDOM (frozen), or CURIOSITY (complexity)
+    """
+    from rulial.compression.flow import CompressionFlowAnalyzer
+
+    console.print(f"[bold cyan]Analyzing compression flow for {rule}...[/bold cyan]")
+    analyzer = CompressionFlowAnalyzer()
     result = analyzer.analyze(rule)
     console.print(result.summary())
 
