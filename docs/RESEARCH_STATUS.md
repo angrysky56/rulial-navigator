@@ -159,8 +159,8 @@ Used **3-group comparison** to avoid cherry-picking:
 ## Open Questions (Remaining)
 
 1. ~~Is B0 necessary AND sufficient?~~ ✅ YES
-2. What's the theoretical minimum eq. density?
-3. Can condensates undergo phase transitions?
+2. ~~What's the theoretical minimum eq. density?~~ ✅ **~20%** (percolation threshold)
+3. Can condensates undergo phase transitions? **→ Continuous crossover, not sharp transition**
 4. ~~Does this generalize to non-totalistic rules?~~ ✅ YES (3-group test)
 
 ---

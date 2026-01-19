@@ -120,6 +120,7 @@ See the [theoretical documentation](docs/The-Metastable-Superfluid-Membrane.md) 
 | **B0/B1 → Condensate** | 100% of B0/B1 rules exhibit condensate behavior |
 | **Universality (Rigorous)** | 3-group test: B0 (+0.93) > Random (+0.80) > Particle (-1.00) |
 | **Goldilocks Zone** | H = 0.3-0.6 predicts computation with **73% precision** |
+| **Percolation Threshold** | Minimum density ~20% ≈ 2D percolation (fractal d_f = 91/48 ≈ 1.896) |
 | **Both Phases Compute** | Gliders found in particles AND condensates |
 
 ### The Goldilocks Zone

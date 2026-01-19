@@ -6,9 +6,7 @@ Uses SQLite for persistence, allowing systematic scans and visualizations.
 """
 
 import sqlite3
-import json
 from typing import Any, Dict, List, Optional
-from dataclasses import asdict
 
 from ..compression.metrics import CompressionTelemetry
 from .topology import TopologicalSignature
@@ -18,7 +16,7 @@ class Atlas:
     """
     The Atlas of Ignorance (Persistent).
     Maps explored Rulial Space with Sheaf & Topological metrics.
-    
+
     Supports both 1D ECA (by rule number) and 2D Totalistic (by rule string).
     """
 
@@ -30,7 +28,8 @@ class Atlas:
 
     def _init_db(self):
         """Initialize database schema with sheaf metrics."""
-        self.conn.execute("""
+        self.conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS explorations (
                 rule_str TEXT PRIMARY KEY,
                 wolfram_class INTEGER,
@@ -63,13 +62,24 @@ class Atlas:
                 emergence REAL,
                 tpe_mode TEXT,
                 
+                -- LLL Combinatorics (v5)
+                p_birth REAL,
+                p_survive REAL,
+                p_active REAL,
+                lll_predicted INTEGER,
+
+                -- Fractal Geometry (v5)
+                fractal_dimension REAL,
+                fractal_class TEXT,
+
                 -- B/S set parsing
                 b_set TEXT,
                 s_set TEXT,
                 
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
-        """)
+        """
+        )
         self.conn.commit()
 
     def record(
@@ -99,42 +109,59 @@ class Atlas:
                 b_set, s_set
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
-        
+
         # Safe extraction with defaults
         cr = telemetry.rigid_ratio_lzma if telemetry else 0.0
         ls = telemetry.loss_derivative if telemetry else 0.0
-        
+
         betti = topology.betti_1 if topology else 0
         p_max = topology.max_persistence if topology else 0.0
-        
+
         eq_d = condensate.equilibrium_density if condensate else 0.0
         exp_f = condensate.expansion_factor if condensate else 0.0
         is_cond = 1 if (condensate and condensate.is_condensate) else 0
-        
+
         mono = sheaf.monodromy_index if sheaf else 0.0
         overlap = sheaf.harmonic_overlap if sheaf else 0.0
         gap = sheaf.spectral_gap if sheaf else 0.0
         s_phase = sheaf.sheaf_type if sheaf else "unknown"
-        
+
         t_val = tpe.toroidal if tpe else 0.0
         p_val = tpe.poloidal if tpe else 0.0
         e_val = tpe.emergence if tpe else 0.0
         tpe_m = tpe.mode if tpe else "unknown"
 
-        self.conn.execute(query, (
-            rule_str, wolfram_class, phase, is_cond,
-            cr, ls,
-            betti, p_max,
-            eq_d, exp_f,
-            mono, overlap, gap, s_phase,
-            t_val, p_val, e_val, tpe_m,
-            b_set, s_set
-        ))
+        self.conn.execute(
+            query,
+            (
+                rule_str,
+                wolfram_class,
+                phase,
+                is_cond,
+                cr,
+                ls,
+                betti,
+                p_max,
+                eq_d,
+                exp_f,
+                mono,
+                overlap,
+                gap,
+                s_phase,
+                t_val,
+                p_val,
+                e_val,
+                tpe_m,
+                b_set,
+                s_set,
+            ),
+        )
         self.conn.commit()
 
     def record_from_dict(self, data: Dict[str, Any]):
         """Record from a dictionary (useful for JSON import)."""
-        self.conn.execute("""
+        self.conn.execute(
+            """
             INSERT OR REPLACE INTO explorations (
                 rule_str, wolfram_class, phase, is_condensate,
                 compression_ratio, betti_1,
@@ -143,37 +170,40 @@ class Atlas:
                 toroidal, poloidal, emergence, tpe_mode,
                 b_set, s_set
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            data.get('rule_str', ''),
-            data.get('wolfram_class', 0),
-            data.get('phase', 'unknown'),
-            1 if data.get('is_condensate', False) else 0,
-            data.get('compression_ratio', 0.0),
-            data.get('betti_1', 0),
-            data.get('equilibrium_density', 0.0),
-            data.get('expansion_factor', 0.0),
-            data.get('monodromy', 0.0),
-            data.get('harmonic_overlap', 0.0),
-            data.get('spectral_gap', 0.0),
-            data.get('sheaf_phase', 'unknown'),
-            data.get('toroidal', 0.0),
-            data.get('poloidal', 0.0),
-            data.get('emergence', 0.0),
-            data.get('tpe_mode', 'unknown'),
-            data.get('b_set', ''),
-            data.get('s_set', ''),
-        ))
+        """,
+            (
+                data.get("rule_str", ""),
+                data.get("wolfram_class", 0),
+                data.get("phase", "unknown"),
+                1 if data.get("is_condensate", False) else 0,
+                data.get("compression_ratio", 0.0),
+                data.get("betti_1", 0),
+                data.get("equilibrium_density", 0.0),
+                data.get("expansion_factor", 0.0),
+                data.get("monodromy", 0.0),
+                data.get("harmonic_overlap", 0.0),
+                data.get("spectral_gap", 0.0),
+                data.get("sheaf_phase", "unknown"),
+                data.get("toroidal", 0.0),
+                data.get("poloidal", 0.0),
+                data.get("emergence", 0.0),
+                data.get("tpe_mode", "unknown"),
+                data.get("b_set", ""),
+                data.get("s_set", ""),
+            ),
+        )
         self.conn.commit()
 
     def import_from_json(self, json_path: str):
         """Import existing atlas JSON data into SQLite."""
         import json as json_module
+
         with open(json_path) as f:
             data = json_module.load(f)
-        
+
         for record in data:
             self.record_from_dict(record)
-        
+
         return len(data)
 
     def get_all_rules(self) -> List[Dict[str, Any]]:
@@ -209,23 +239,29 @@ class Atlas:
         )
         return [row[0] for row in cursor.fetchall()]
 
-    def get_computational_candidates(self, min_overlap: float = 0.3, max_overlap: float = 0.7) -> List[Dict[str, Any]]:
+    def get_computational_candidates(
+        self, min_overlap: float = 0.3, max_overlap: float = 0.7
+    ) -> List[Dict[str, Any]]:
         """
         Get rules in the 'Goldilocks zone' for computation.
         High harmonic overlap = near equilibrium (frozen)
         Low harmonic overlap = far from equilibrium (chaotic)
         Middle = potential for structured computation
         """
-        cursor = self.conn.execute("""
+        cursor = self.conn.execute(
+            """
             SELECT * FROM explorations 
             WHERE harmonic_overlap BETWEEN ? AND ?
             ORDER BY harmonic_overlap
-        """, (min_overlap, max_overlap))
+        """,
+            (min_overlap, max_overlap),
+        )
         return [dict(row) for row in cursor.fetchall()]
 
     def get_statistics(self) -> Dict[str, Any]:
         """Get summary statistics."""
-        cursor = self.conn.execute("""
+        cursor = self.conn.execute(
+            """
             SELECT 
                 COUNT(*) as total,
                 SUM(CASE WHEN wolfram_class = 4 THEN 1 ELSE 0 END) as class_4,
@@ -233,7 +269,8 @@ class Atlas:
                 AVG(harmonic_overlap) as avg_overlap,
                 AVG(monodromy) as avg_monodromy
             FROM explorations
-        """)
+        """
+        )
         row = cursor.fetchone()
         return dict(row) if row else {}
 
@@ -241,15 +278,15 @@ class Atlas:
         """Return the map color for a rule."""
         cursor = self.conn.execute(
             "SELECT wolfram_class, is_condensate FROM explorations WHERE rule_str = ?",
-            (rule_str,)
+            (rule_str,),
         )
         row = cursor.fetchone()
-        
+
         if not row:
             return "black"  # Terra Incognita
-        
-        c, is_cond = row['wolfram_class'], row['is_condensate']
-        
+
+        c, is_cond = row["wolfram_class"], row["is_condensate"]
+
         if c == 1 or c == 2:
             return "blue"  # Ice
         elif c == 3:
@@ -258,7 +295,7 @@ class Atlas:
             if is_cond:
                 return "cyan"  # Condensate
             return "gold"  # Particle (The Filament)
-        
+
         return "grey"
 
     def close(self):

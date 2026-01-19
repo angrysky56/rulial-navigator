@@ -202,7 +202,65 @@ This suggests a **phase diagram** mapping S parameters to vacuum energy.
 
 ---
 
-## 5. The Spectral Basis of Computation
+## 5. The Percolation Threshold: A Universal Critical Point
+
+### 5.1 The ~18% Floor
+
+A systematic scan of 100 B0 rules reveals a **minimum equilibrium density of ~20%**:
+
+| Rule | Density | S-sum |
+|------|---------|-------|
+| B0/S058 | **20.4%** | 13 |
+| B0/S04678 | 20.5% | 25 |
+| B0/S0578 | 20.6% | 20 |
+
+This floor is remarkably close to the **2D site percolation threshold (~18%)**. Below this density, the membrane cannot remain connected — it fragments into disconnected clusters.
+
+### 5.2 The Fractal Dimension Connection
+
+At the percolation threshold, clusters exhibit a universal fractal dimension:
+
+$$d_f = \frac{91}{48} \approx 1.8958$$
+
+This is a **universal constant** — independent of lattice geometry or rule details. The recurring appearance of ~1.8-1.9 in "edge of chaos" contexts across complex systems suggests a deep mathematical connection.
+
+### 5.3 Physical Interpretation
+
+| CA Phenomenon | Physical Analog |
+|---------------|-----------------|
+| Minimum density ~20% | Vacuum ground state |
+| Percolation threshold | Quantum phase transition |
+| Fractal clusters | Critical phenomena |
+
+The condensate membrane at minimum density is **barely connected** — a fractal dust at the critical point between order (percolating) and disorder (fragmented).
+
+---
+
+## 6. S-Parameter Sweep: Continuous Crossover
+
+### 6.1 Density vs S-Sum
+
+A systematic sweep of B0 rules with varying S-parameters reveals:
+
+| S-sum Range | Mean Density | Behavior |
+|-------------|--------------|----------|
+| 0-10 | 25-35% | Low density |
+| 10-25 | 20-30% | **Floor region** |
+| 25-36 | 30-55% | High density |
+
+### 6.2 Statistical Analysis
+
+- **Correlation (S-sum ↔ Density):** r = 0.41 (weak positive)
+- **Density range:** 20.2% - 55.3%
+- **Largest jump:** +22% at S-sum = 30
+
+### 6.3 Conclusion: Crossover, Not Phase Transition
+
+The relationship between S-sum and density is **non-monotonic** but **continuous**. There is no sharp phase transition, but rather a smooth crossover. The 22% jump at high S-sum suggests a **dynamical transition** (change in attractor structure) rather than a thermodynamic phase transition.
+
+---
+
+## 7. The Spectral Basis of Computation
 
 Our analysis reveals that computational capacity is not determined by the vacuum phase (Condensate vs. Particle), but by the **Sheaf Spectral Profile**.
 

@@ -69,20 +69,57 @@ uv run rulial pipeline --mode query --query "logic capable"
 ### Atlas Scanning
 
 ```bash
-# V4 Scanner (recommended)
-uv run python -m rulial.runners.probe_2d_v4 --mode quick --samples 200
+# V5 Scanner (RECOMMENDED - with LLL + Sheaf + Fractal + Titans)
+uv run python -m rulial.runners.probe_2d_v5_complete --mode sample --samples 500
 
 # Modes:
-#   quick     - Random sampling (fast)
-#   full      - Systematic grid (comprehensive)
-#   region    - Targeted B/S range
-#   condensate - Focus on B0 rules
+#   sample    - Random sampling with Titans learning
+#   full      - Exhaustive scan of all 262K totalistic rules
+#   titans    - Titans-guided intelligent exploration
 
-# Options:
+# V5 Options:
+#   --samples N      Number of rules to sample (sample mode)
+#   --steps N        Number of exploration steps (titans mode)
+#   --db FILE        SQLite database path (default: atlas_v5.db)
+#   --output FILE    JSON backup file
+```
+
+#### V5 Discovery Engine Features
+
+| Feature | Description |
+|---------|-------------|
+| **LLL Combinatorial Filter** | 150K rules/sec pre-filter using rule combinatorics |
+| **Sheaf Harmonic Overlap** | Goldilocks zone detection (H=0.3-0.6) |
+| **Fractal Dimension** | Box-counting phase classification |
+| **Titans Neural Navigator** | Test-time learning on rule space |
+| **SQLite Atlas** | Persistent database with all metrics |
+
+#### V5 Examples
+
+```bash
+# Quick sample with Titans learning
+uv run python -m rulial.runners.probe_2d_v5_complete --mode sample --samples 1000
+
+# Full scan with Titans learning (builds complete neural model for 262K rules, ~14 hours for Phase 2)
+uv run python -m rulial.runners.probe_2d_v5_complete --mode full --db atlas_full.db
+
+# Titans-guided exploration (intelligent navigation)
+uv run python -m rulial.runners.probe_2d_v5_complete --mode titans --steps 200
+
+# Check database
+sqlite3 atlas_v5.db "SELECT rule_str, harmonic_overlap, fractal_dimension FROM explorations WHERE wolfram_class=4"
+```
+
+#### Legacy V4 Scanner
+
+```bash
+# V4 Scanner (simpler, no Titans)
+uv run python -m rulial.runners.probe_2d_v4 --mode quick --samples 200
+
+# V4 Options:
+#   --mode quick|full|region|condensate
 #   --samples N      Number of rules to scan
 #   --output FILE    Output JSON file
-#   --grid-size N    Simulation grid size
-#   --steps N        Simulation steps
 ```
 
 ### Web Observatory
@@ -92,7 +129,7 @@ uv run rulial serve
 # Open http://localhost:8000
 ```
 
----
+
 
 ## Python API
 
@@ -267,11 +304,14 @@ Maximum emergence occurs when T ≈ P ≈ 0.5.
 ### 1. Discover Interesting Rules
 
 ```bash
-# Scan for Class 4 rules
-uv run python -m rulial.runners.probe_2d_v4 --mode quick --samples 500 --output discovery.json
+# V5 scan for Class 4 rules (recommended)
+uv run python -m rulial.runners.probe_2d_v5_complete --mode sample --samples 500 --db discovery.db
 
-# Check results
-cat discovery.json | jq '.[] | select(.wolfram_class == 4) | .rule_str'
+# Query results
+sqlite3 discovery.db "SELECT rule_str, harmonic_overlap, fractal_dimension FROM explorations WHERE wolfram_class=4"
+
+# Or use Titans-guided exploration
+uv run python -m rulial.runners.probe_2d_v5_complete --mode titans --steps 100 --db discovery.db
 ```
 
 ### 2. Deep Analysis of a Rule
@@ -371,10 +411,15 @@ Examples:
 | `src/rulial/compression/flow.py`    | Compression flow analyzer  |
 | `src/rulial/mapper/tpe.py`          | T-P+E framework            |
 | `src/rulial/mapper/condensate.py`   | Vacuum condensate analyzer |
+| `src/rulial/mapper/sheaf.py`        | Sheaf harmonic analysis    |
+| `src/rulial/mapper/fractal.py`      | Fractal dimension (V5)     |
+| `src/rulial/mapper/lll_complexity.py` | LLL combinatorial filter (V5) |
+| `src/rulial/mapper/atlas.py`        | SQLite Atlas database      |
 | `src/rulial/mining/oligon.py`       | Oligon counter             |
 | `src/rulial/mining/extractor.py`    | Particle miner             |
-| `src/rulial/runners/probe_2d_v4.py` | Atlas scanner              |
-| `src/rulial/navigator/titans.py`    | Online learning agent      |
+| `src/rulial/runners/probe_2d_v5_complete.py` | V5 Discovery Engine |
+| `src/rulial/runners/probe_2d_v4.py` | Legacy V4 scanner          |
+| `src/rulial/navigator/titans.py`    | Titans neural navigator    |
 
 ---
 
