@@ -72,6 +72,9 @@ uv run rulial pipeline --mode query --query "logic capable"
 # V5 Scanner (RECOMMENDED - with LLL + Sheaf + Fractal + Titans)
 uv run python -m rulial.runners.probe_2d_v5_complete --mode sample --samples 500
 
+# GPU-accelerated scanning (requires CUDA)
+uv run python -m rulial.runners.probe_2d_v5_complete --mode sample --samples 500 --gpu
+
 # Modes:
 #   sample    - Random sampling with Titans learning
 #   full      - Exhaustive scan of all 262K totalistic rules
@@ -82,17 +85,20 @@ uv run python -m rulial.runners.probe_2d_v5_complete --mode sample --samples 500
 #   --steps N        Number of exploration steps (titans mode)
 #   --db FILE        SQLite database path (default: atlas_v5.db)
 #   --output FILE    JSON backup file
+#   --gpu            Use GPU-accelerated Sheaf analysis (CUDA)
+#   --workers N      Parallel workers (0 = auto, 1 = sequential)
 ```
 
 #### V5 Discovery Engine Features
 
-| Feature | Description |
-|---------|-------------|
+| Feature                      | Description                                        |
+| ---------------------------- | -------------------------------------------------- |
 | **LLL Combinatorial Filter** | 150K rules/sec pre-filter using rule combinatorics |
-| **Sheaf Harmonic Overlap** | Goldilocks zone detection (H=0.3-0.6) |
-| **Fractal Dimension** | Box-counting phase classification |
-| **Titans Neural Navigator** | Test-time learning on rule space |
-| **SQLite Atlas** | Persistent database with all metrics |
+| **Sheaf Harmonic Overlap**   | Goldilocks zone detection (H=0.3-0.6)              |
+| **GPU Sheaf Analysis**       | CUDA-accelerated Laplacian eigendecomposition      |
+| **Fractal Dimension**        | Box-counting phase classification                  |
+| **Titans Neural Navigator**  | Test-time learning on rule space                   |
+| **SQLite Atlas**             | Persistent database with all metrics               |
 
 #### V5 Examples
 
@@ -100,8 +106,14 @@ uv run python -m rulial.runners.probe_2d_v5_complete --mode sample --samples 500
 # Quick sample with Titans learning
 uv run python -m rulial.runners.probe_2d_v5_complete --mode sample --samples 1000
 
-# Full scan with Titans learning (builds complete neural model for 262K rules, ~14 hours for Phase 2)
+# GPU-accelerated sample (Titans + GPU Sheaf on same CUDA device)
+uv run python -m rulial.runners.probe_2d_v5_complete --mode sample --samples 500 --gpu
+
+# Full scan with Titans learning (~14 hours for Phase 2)
 uv run python -m rulial.runners.probe_2d_v5_complete --mode full --db atlas_full.db
+
+# Full scan with GPU acceleration (~5 hours)
+uv run python -m rulial.runners.probe_2d_v5_complete --mode full --gpu --db atlas_full_gpu.db
 
 # Titans-guided exploration (intelligent navigation)
 uv run python -m rulial.runners.probe_2d_v5_complete --mode titans --steps 200
@@ -128,8 +140,6 @@ uv run python -m rulial.runners.probe_2d_v4 --mode quick --samples 200
 uv run rulial serve
 # Open http://localhost:8000
 ```
-
-
 
 ## Python API
 
@@ -223,6 +233,28 @@ result = mapper.compute_persistence(spacetime)
 print(f"β₀ (components): {result.betti_0}")
 print(f"β₁ (loops): {result.betti_1}")
 print(f"Persistence entropy: {result.persistence_entropy:.4f}")
+```
+
+### GPU Sheaf Analysis (CUDA)
+
+```python
+from rulial.mapper.sheaf_gpu import (
+    SheafLaplacianGPU,
+    analyze_rule_gpu,
+    batch_analyze_rules_gpu
+)
+
+# Single rule analysis on GPU
+result = analyze_rule_gpu("B3/S23", grid_size=48, steps=100, device='cuda')
+print(f"H = {result.harmonic_overlap:.3f}")
+print(f"Spectral Gap = {result.spectral_gap:.4f}")
+print(f"Type = {result.sheaf_type}")
+
+# Batch analysis (much faster)
+rules = ["B3/S23", "B36/S23", "B0/S8", "B6/S123467"]
+results = batch_analyze_rules_gpu(rules, device='cuda')
+for rule, r in zip(rules, results, strict=False):
+    print(f"{rule}: H={r.harmonic_overlap:.3f}")
 ```
 
 ### Unified Pipeline
@@ -404,22 +436,23 @@ Examples:
 
 ## Key Files
 
-| Path                                | Description                |
-| ----------------------------------- | -------------------------- |
-| `src/rulial/cli.py`                 | CLI entry point            |
-| `src/rulial/pipeline.py`            | Unified analysis pipeline  |
-| `src/rulial/compression/flow.py`    | Compression flow analyzer  |
-| `src/rulial/mapper/tpe.py`          | T-P+E framework            |
-| `src/rulial/mapper/condensate.py`   | Vacuum condensate analyzer |
-| `src/rulial/mapper/sheaf.py`        | Sheaf harmonic analysis    |
-| `src/rulial/mapper/fractal.py`      | Fractal dimension (V5)     |
-| `src/rulial/mapper/lll_complexity.py` | LLL combinatorial filter (V5) |
-| `src/rulial/mapper/atlas.py`        | SQLite Atlas database      |
-| `src/rulial/mining/oligon.py`       | Oligon counter             |
-| `src/rulial/mining/extractor.py`    | Particle miner             |
-| `src/rulial/runners/probe_2d_v5_complete.py` | V5 Discovery Engine |
-| `src/rulial/runners/probe_2d_v4.py` | Legacy V4 scanner          |
-| `src/rulial/navigator/titans.py`    | Titans neural navigator    |
+| Path                                         | Description                   |
+| -------------------------------------------- | ----------------------------- |
+| `src/rulial/cli.py`                          | CLI entry point               |
+| `src/rulial/pipeline.py`                     | Unified analysis pipeline     |
+| `src/rulial/compression/flow.py`             | Compression flow analyzer     |
+| `src/rulial/mapper/tpe.py`                   | T-P+E framework               |
+| `src/rulial/mapper/condensate.py`            | Vacuum condensate analyzer    |
+| `src/rulial/mapper/sheaf.py`                 | Sheaf harmonic analysis       |
+| `src/rulial/mapper/sheaf_gpu.py`             | GPU Sheaf Laplacian (CUDA)    |
+| `src/rulial/mapper/fractal.py`               | Fractal dimension (V5)        |
+| `src/rulial/mapper/lll_complexity.py`        | LLL combinatorial filter (V5) |
+| `src/rulial/mapper/atlas.py`                 | SQLite Atlas database         |
+| `src/rulial/mining/oligon.py`                | Oligon counter                |
+| `src/rulial/mining/extractor.py`             | Particle miner                |
+| `src/rulial/runners/probe_2d_v5_complete.py` | V5 Discovery Engine           |
+| `src/rulial/runners/probe_2d_v4.py`          | Legacy V4 scanner             |
+| `src/rulial/navigator/titans.py`             | Titans neural navigator       |
 
 ---
 

@@ -20,6 +20,8 @@ import json
 import logging
 import time
 from dataclasses import asdict, dataclass
+from functools import partial
+from multiprocessing import Pool, cpu_count
 
 import numpy as np
 
@@ -170,6 +172,87 @@ def physics_validation(rule_str: str, grid_size: int = 48, steps: int = 100) -> 
     return result
 
 
+def physics_validation_gpu(
+    rule_str: str, grid_size: int = 48, steps: int = 100
+) -> dict:
+    """
+    Phase 2: GPU-accelerated physics validation with Sheaf + Fractal.
+    Uses PyTorch for Sheaf analysis on GPU.
+    """
+    start = time.perf_counter()
+
+    result = {
+        "harmonic_overlap": 0.0,
+        "monodromy_index": 0.0,
+        "fractal_dimension": 0.0,
+        "equilibrium_density": 0.0,
+        "is_goldilocks": False,
+        "fractal_class": "unknown",
+        "wolfram_class": 0,
+    }
+
+    try:
+        # A. GPU Sheaf Analysis
+        from rulial.mapper.sheaf_gpu import analyze_rule_gpu
+
+        sheaf_result = analyze_rule_gpu(rule_str, grid_size, steps, device="cuda")
+
+        result["harmonic_overlap"] = sheaf_result.harmonic_overlap
+        result["monodromy_index"] = sheaf_result.monodromy_index
+
+    except Exception:
+        logging.exception(f"GPU Sheaf analysis failed for rule {rule_str}")
+        # Fallback to CPU
+        try:
+            from rulial.mapper.sheaf import SheafAnalyzer
+
+            sheaf = SheafAnalyzer(grid_size=grid_size, steps=steps)
+            sheaf_result = sheaf.analyze(rule_str)
+            result["harmonic_overlap"] = sheaf_result.harmonic_overlap
+            result["monodromy_index"] = sheaf_result.monodromy_index
+        except Exception:
+            pass
+
+    try:
+        # B. Fractal Dimension (still CPU - fast enough)
+        from rulial.engine.totalistic import Totalistic2DEngine
+
+        engine = Totalistic2DEngine(rule_str)
+        np.random.seed(42)
+        history = engine.simulate(grid_size, grid_size, steps, "random", density=0.3)
+        final_grid = history[-1]
+
+        result["equilibrium_density"] = final_grid.sum() / (grid_size * grid_size)
+        result["fractal_dimension"] = compute_fractal_dimension(final_grid)
+        result["fractal_class"] = classify_by_fractal_dimension(
+            result["fractal_dimension"]
+        )
+
+    except Exception:
+        logging.exception(f"Fractal analysis failed for rule {rule_str}")
+
+    # C. Goldilocks Classification
+    H = result["harmonic_overlap"]
+    result["is_goldilocks"] = 0.3 <= H <= 0.6
+
+    # D. Wolfram Class (enhanced)
+    density = result["equilibrium_density"]
+    d_f = result["fractal_dimension"]
+
+    if density < 0.02 or density > 0.98:
+        result["wolfram_class"] = 1  # Trivial
+    elif result["is_goldilocks"]:
+        result["wolfram_class"] = 4  # Computational
+    elif d_f > 1.9:
+        result["wolfram_class"] = 2  # Periodic/stable
+    else:
+        result["wolfram_class"] = 3  # Chaotic
+
+    result["physics_time_ms"] = (time.perf_counter() - start) * 1000
+
+    return result
+
+
 def rule_to_vector(rule_str: str) -> np.ndarray:
     """Convert B/S rule string to 18-bit binary vector for Titans."""
     digits = "012345678"
@@ -195,6 +278,53 @@ def vector_to_rule(vector: np.ndarray) -> str:
     b_str = "".join(d for i, d in enumerate(digits) if vector[i] > 0.5)
     s_str = "".join(d for i, d in enumerate(digits) if vector[9 + i] > 0.5)
     return f"B{b_str}/S{s_str}"
+
+
+def _physics_worker(rule_str: str) -> tuple:
+    """Worker function for multiprocessing - must be at module level for pickle."""
+    return (rule_str, physics_validation(rule_str))
+
+
+def _physics_worker_gpu(rule_str: str) -> tuple:
+    """GPU worker function for multiprocessing - must be at module level for pickle."""
+    return (rule_str, physics_validation_gpu(rule_str))
+
+
+def _write_batch_to_db(atlas, discoveries: list):
+    """Write a batch of discoveries to the database efficiently."""
+    try:
+        for discovery in discoveries:
+            atlas.conn.execute(
+                """
+                INSERT OR REPLACE INTO explorations (
+                    rule_str, wolfram_class, phase, is_condensate,
+                    equilibrium_density, harmonic_overlap, monodromy, 
+                    sheaf_phase, p_birth, p_survive, p_active, lll_predicted,
+                    fractal_dimension, fractal_class, b_set, s_set
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+                (
+                    discovery.rule_str,
+                    discovery.wolfram_class,
+                    "goldilocks" if discovery.is_goldilocks else "candidate",
+                    0,  # is_condensate
+                    discovery.equilibrium_density,
+                    discovery.harmonic_overlap,
+                    discovery.monodromy_index,
+                    discovery.fractal_class,
+                    discovery.p_birth,
+                    discovery.p_survive,
+                    discovery.p_active,
+                    1 if discovery.lll_predicted else 0,
+                    discovery.fractal_dimension,
+                    discovery.fractal_class,
+                    "",  # b_set
+                    "",  # s_set
+                ),
+            )
+        atlas.conn.commit()
+    except Exception:
+        logging.exception("Failed to write batch to database")
 
 
 def run_titans_exploration(
@@ -347,28 +477,39 @@ def run_discovery_engine(
     db_path: str = "atlas_v5.db",
     output_json: str = "discoveries_v5.json",
     use_titans: bool = True,  # Enable Titans learning by default
+    workers: int = 1,  # Number of parallel workers (1 = sequential)
+    use_gpu: bool = False,  # Use GPU-accelerated Sheaf analysis
 ):
     """
     The complete V5 Discovery Engine with SQLite persistence.
 
     If use_titans=True, also trains a Titans neural model on all scanned rules.
+    If workers > 1, uses multiprocessing for Phase 2 physics validation.
     """
     from rulial.mapper.atlas import Atlas
 
+    # Determine actual worker count
+    if workers <= 0:
+        workers = max(1, cpu_count() - 1)  # Leave one core free
+
     print("╔══════════════════════════════════════════════════════════╗")
-    if use_titans:
+    if use_gpu:
+        print("║   V5 DISCOVERY ENGINE: LLL + GPU SHEAF + FRACTAL         ║")
+    elif use_titans:
         print("║   V5 DISCOVERY ENGINE: LLL + SHEAF + FRACTAL + TITANS   ║")
     else:
         print("║   V5 DISCOVERY ENGINE: LLL + SHEAF + FRACTAL             ║")
     print("╚══════════════════════════════════════════════════════════╝")
     print()
     print(f"Database: {db_path}")
+    print(f"GPU Sheaf: {'Enabled' if use_gpu else 'Disabled'}")
     print(f"Titans Learning: {'Enabled' if use_titans else 'Disabled'}")
+    print(f"Workers: {workers} {'(parallel)' if workers > 1 else '(sequential)'}")
     print()
 
-    # Initialize Titans if enabled
+    # Initialize Titans if enabled (only in main process for sequential mode)
     titans = None
-    if use_titans:
+    if use_titans and workers == 1:
         try:
             from rulial.navigator.titans import TitansNavigator
 
@@ -434,70 +575,74 @@ def run_discovery_engine(
     atlas = Atlas(db_path)
 
     goldilocks_count = 0
+    candidate_rules = [d.rule_str for d in candidates]
 
-    for i, discovery in enumerate(candidates):
-        print(
-            f"\r[{i+1}/{len(candidates)}] {discovery.rule_str:<20}", end="", flush=True
-        )
+    # Create a dict to look up discoveries by rule string
+    discovery_map = {d.rule_str: d for d in candidates}
 
-        physics = physics_validation(discovery.rule_str)
+    def process_results(results_iter, total):
+        """Process physics results (works for both sequential and parallel)."""
+        nonlocal goldilocks_count
+        batch = []
 
-        discovery.harmonic_overlap = physics["harmonic_overlap"]
-        discovery.monodromy_index = physics["monodromy_index"]
-        discovery.fractal_dimension = physics["fractal_dimension"]
-        discovery.equilibrium_density = physics["equilibrium_density"]
-        discovery.is_goldilocks = physics["is_goldilocks"]
-        discovery.fractal_class = physics["fractal_class"]
-        discovery.wolfram_class = physics["wolfram_class"]
-        discovery.physics_time_ms = physics["physics_time_ms"]
+        for i, (rule_str, physics) in enumerate(results_iter):
+            discovery = discovery_map[rule_str]
+            discovery.harmonic_overlap = physics["harmonic_overlap"]
+            discovery.monodromy_index = physics["monodromy_index"]
+            discovery.fractal_dimension = physics["fractal_dimension"]
+            discovery.equilibrium_density = physics["equilibrium_density"]
+            discovery.is_goldilocks = physics["is_goldilocks"]
+            discovery.fractal_class = physics["fractal_class"]
+            discovery.wolfram_class = physics["wolfram_class"]
+            discovery.physics_time_ms = physics["physics_time_ms"]
 
-        # Titans learning (if enabled)
-        if titans is not None:
-            rule_vec = rule_to_vector(discovery.rule_str)
-            entropy_signal = discovery.harmonic_overlap
-            titans.probe_and_learn(rule_vec, entropy_signal)
+            # Titans learning (only in sequential mode)
+            if titans is not None:
+                rule_vec = rule_to_vector(discovery.rule_str)
+                entropy_signal = discovery.harmonic_overlap
+                titans.probe_and_learn(rule_vec, entropy_signal)
 
-        # Store in database
-        try:
-            atlas.conn.execute(
-                """
-                INSERT OR REPLACE INTO explorations (
-                    rule_str, wolfram_class, phase, is_condensate,
-                    equilibrium_density, harmonic_overlap, monodromy, 
-                    sheaf_phase, p_birth, p_survive, p_active, lll_predicted,
-                    fractal_dimension, fractal_class, b_set, s_set
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-                (
-                    discovery.rule_str,
-                    discovery.wolfram_class,
-                    "goldilocks" if discovery.is_goldilocks else "candidate",
-                    0,  # is_condensate
-                    discovery.equilibrium_density,
-                    discovery.harmonic_overlap,
-                    discovery.monodromy_index,
-                    discovery.fractal_class,
-                    discovery.p_birth,
-                    discovery.p_survive,
-                    discovery.p_active,
-                    1 if discovery.lll_predicted else 0,
-                    discovery.fractal_dimension,
-                    discovery.fractal_class,
-                    "",  # b_set (parsed separately if needed)
-                    "",  # s_set
-                ),
-            )
-            atlas.conn.commit()
-        except Exception:
-            logging.exception(
-                f"Failed to insert rule {discovery.rule_str} into database"
-            )
+            # Batch database writes for efficiency
+            batch.append(discovery)
 
-        if discovery.is_goldilocks:
-            goldilocks_count += 1
-            print(
-                f" 🌟 H={discovery.harmonic_overlap:.3f} d_f={discovery.fractal_dimension:.3f}"
-            )
+            if discovery.is_goldilocks:
+                goldilocks_count += 1
+                print(
+                    f"\r[{i+1}/{total}] {discovery.rule_str:<20} 🌟 H={discovery.harmonic_overlap:.3f} d_f={discovery.fractal_dimension:.3f}"
+                )
+            else:
+                print(f"\r[{i+1}/{total}] {discovery.rule_str:<20}", end="", flush=True)
+
+            # Write batch every 50 rules
+            if len(batch) >= 50:
+                _write_batch_to_db(atlas, batch)
+                batch = []
+
+        # Write remaining batch
+        if batch:
+            _write_batch_to_db(atlas, batch)
+
+    if workers > 1:
+        # Parallel processing
+        worker_fn = _physics_worker_gpu if use_gpu else _physics_worker
+        print(f"Using {workers} workers for parallel physics validation...")
+        if use_gpu:
+            print("  (GPU Sheaf analysis enabled)")
+
+        with Pool(workers) as pool:
+            results = pool.imap_unordered(worker_fn, candidate_rules, chunksize=10)
+            process_results(results, len(candidates))
+    else:
+        # Sequential processing
+        def sequential_results():
+            if use_gpu:
+                for rule_str in candidate_rules:
+                    yield (rule_str, physics_validation_gpu(rule_str))
+            else:
+                for rule_str in candidate_rules:
+                    yield (rule_str, physics_validation(rule_str))
+
+        process_results(sequential_results(), len(candidates))
 
     physics_time = time.time() - start
     print()
@@ -603,6 +748,17 @@ def main():
         default="discoveries_v5.json",
         help="JSON output file path",
     )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=1,
+        help="Number of parallel workers (0 = auto, 1 = sequential)",
+    )
+    parser.add_argument(
+        "--gpu",
+        action="store_true",
+        help="Use GPU-accelerated Sheaf analysis (requires CUDA)",
+    )
 
     args = parser.parse_args()
 
@@ -617,6 +773,8 @@ def main():
             samples=args.samples,
             db_path=args.db,
             output_json=args.output,
+            workers=args.workers,
+            use_gpu=args.gpu,
         )
 
 

@@ -6,7 +6,7 @@
 
 ## What Is This?
 
-Imagine every possible set of rules that could govern a universe—every way particles could interact, every law of physics that *could* exist. The **Ruliad** is the mathematical space containing *all* of these possible rule systems.
+Imagine every possible set of rules that could govern a universe—every way particles could interact, every law of physics that _could_ exist. The **Ruliad** is the mathematical space containing _all_ of these possible rule systems.
 
 This project is a **navigator** that explores this space, searching for rules that produce complexity, structure, and the conditions for computation—the same conditions that allow matter, life, and minds to exist.
 
@@ -16,7 +16,7 @@ This project is a **navigator** that explores this space, searching for rules th
 - **We measure what happens**: Does it freeze? Explode into chaos? Or create interesting patterns?
 - **We found something surprising**: Rules divide into two fundamentally different "phases"—like ice and water
 
-> *Think of it like exploring an endless library of physics textbooks, each describing a different universe, and discovering that all the "interesting" ones fall into just two categories.*
+> _Think of it like exploring an endless library of physics textbooks, each describing a different universe, and discovering that all the "interesting" ones fall into just two categories._
 
 ---
 
@@ -24,12 +24,13 @@ This project is a **navigator** that explores this space, searching for rules th
 
 Just as water can exist as ice (solid) or liquid, computational rules exist in two distinct **phases**:
 
-| Phase | What It Looks Like | Everyday Analogy | Example |
-|-------|-------------------|------------------|---------|
-| **Particle** | Things move through empty space | Planets orbiting in a vacuum | Game of Life |
-| **Condensate** | Space itself is "full"—no emptiness | Sound waves in water | B078/S012478 |
+| Phase          | What It Looks Like                  | Everyday Analogy             | Example      |
+| -------------- | ----------------------------------- | ---------------------------- | ------------ |
+| **Particle**   | Things move through empty space     | Planets orbiting in a vacuum | Game of Life |
+| **Condensate** | Space itself is "full"—no emptiness | Sound waves in water         | B078/S012478 |
 
 **Both phases can compute.** Both can support "gliders" (moving patterns that transmit information). They just do it differently:
+
 - **Particles:** Information travels as discrete objects
 - **Condensates:** Information travels as waves
 
@@ -41,6 +42,7 @@ Just as water can exist as ice (solid) or liquid, computational rules exist in t
 <summary><strong>Physics Connection</strong></summary>
 
 The particle/condensate distinction maps to QFT vacuum states:
+
 - **Particle phase** → Perturbative vacuum with localized excitations
 - **Condensate phase** → Symmetry-broken vacuum (BCS-like)
 
@@ -52,6 +54,7 @@ The **Harmonic Overlap (H)** metric corresponds to the projection onto ker(L) wh
 <summary><strong>Mathematics</strong></summary>
 
 We use **cellular sheaf theory** to analyze CA dynamics:
+
 - **Coboundary operator δ₀**: maps 0-cochains (cell values) → 1-cochains (edge differences)
 - **Sheaf Laplacian L = δ₀ᵀδ₀**: governs diffusion
 - **H¹ = coker(δ₀)**: irreducible topological structures (≈ Betti-1)
@@ -63,6 +66,7 @@ We use **cellular sheaf theory** to analyze CA dynamics:
 <summary><strong>Computational Complexity</strong></summary>
 
 The **Goldilocks Zone** (H = 0.3-0.6) corresponds to the edge of chaos:
+
 - Too frozen (H > 0.9): No information processing
 - Too chaotic (H < 0.3): Information destroyed
 - Just right: Persistent mobile structures (gliders) can exist
@@ -79,15 +83,16 @@ This is the **spectral signature of Turing-completeness**.
 
 The navigator measures information flow in each rule:
 
-| Signal | Meaning | Action |
-|--------|---------|--------|
+| Signal             | Meaning                | Action    |
+| ------------------ | ---------------------- | --------- |
 | 🔥 **FRUSTRATION** | Chaos—nothing persists | Move away |
-| ❄️ **BOREDOM** | Frozen—nothing happens | Move away |
-| ✨ **CURIOSITY** | Structure + dynamics | Explore! |
+| ❄️ **BOREDOM**     | Frozen—nothing happens | Move away |
+| ✨ **CURIOSITY**   | Structure + dynamics   | Explore!  |
 
 ### T-P+E: Expansion vs Contraction
 
 Every rule system balances:
+
 - **Toroidal (T):** Expansion, spreading out
 - **Poloidal (P):** Contraction, coming together
 - **Emergence:** How much interesting structure appears
@@ -100,12 +105,12 @@ Maximum complexity occurs when these forces balance.
 
 This project builds on the **Metastable Superfluid Membrane** hypothesis:
 
-| What We See | What It Might Mean |
-|-------------|-------------------|
-| **Particles** | Knots in spacetime |
-| **Speed of light** | Rigidity of the vacuum "membrane" |
-| **Time** | Direction toward equilibrium |
-| **Dark matter** | Scaffolding of stable micro-structures |
+| What We See        | What It Might Mean                     |
+| ------------------ | -------------------------------------- |
+| **Particles**      | Knots in spacetime                     |
+| **Speed of light** | Rigidity of the vacuum "membrane"      |
+| **Time**           | Direction toward equilibrium           |
+| **Dark matter**    | Scaffolding of stable micro-structures |
 
 See the [theoretical documentation](docs/The-Metastable-Superfluid-Membrane.md) for deep dives.
 
@@ -115,21 +120,21 @@ See the [theoretical documentation](docs/The-Metastable-Superfluid-Membrane.md) 
 
 ### Key Discoveries (2026)
 
-| Discovery | Evidence |
-|-----------|----------|
-| **B0/B1 → Condensate** | 100% of B0/B1 rules exhibit condensate behavior |
-| **Universality (Rigorous)** | 3-group test: B0 (+0.93) > Random (+0.80) > Particle (-1.00) |
-| **Goldilocks Zone** | H = 0.3-0.6 predicts computation with **73% precision** |
-| **Percolation Threshold** | Minimum density ~20% ≈ 2D percolation (fractal d_f = 91/48 ≈ 1.896) |
-| **Both Phases Compute** | Gliders found in particles AND condensates |
+| Discovery                   | Evidence                                                            |
+| --------------------------- | ------------------------------------------------------------------- |
+| **B0/B1 → Condensate**      | 100% of B0/B1 rules exhibit condensate behavior                     |
+| **Universality (Rigorous)** | 3-group test: B0 (+0.93) > Random (+0.80) > Particle (-1.00)        |
+| **Goldilocks Zone**         | H = 0.3-0.6 predicts computation with **73% precision**             |
+| **Percolation Threshold**   | Minimum density ~20% ≈ 2D percolation (fractal d_f = 91/48 ≈ 1.896) |
+| **Both Phases Compute**     | Gliders found in particles AND condensates                          |
 
 ### The Goldilocks Zone
 
 Computation emerges where **Harmonic Overlap** H = 0.3-0.6:
 
-| Rule | Phase | H | Structures |
-|------|-------|---|------------|
-| B6/S123467 | Particle | 0.503 | 11 Gliders, 45 Still Lifes |
+| Rule        | Phase      | H     | Structures                 |
+| ----------- | ---------- | ----- | -------------------------- |
+| B6/S123467  | Particle   | 0.503 | 11 Gliders, 45 Still Lifes |
 | B0467/S0568 | Condensate | 0.479 | 6 Solitons, 25 Oscillators |
 
 **Precision:** 73% of random Goldilocks rules contain gliders (stress-tested).
@@ -144,12 +149,12 @@ Universality confirmed via 3-group comparison (B0 vs Random vs Strict Particle).
 
 All figures are in [`docs/visualizations/`](docs/visualizations/):
 
-| Figure | Description |
-|--------|-------------|
-| `fig_goldilocks_zone.png` | Phase diagram showing computational sweet spot |
-| `fig_monodromy_histogram.png` | Bimodal phase separation |
-| `fig_s_sum_correlation.png` | Vacuum energy prediction (r = 0.632) |
-| `fig_tpe_modes.png` | T-P+E dynamics distribution |
+| Figure                        | Description                                    |
+| ----------------------------- | ---------------------------------------------- |
+| `fig_goldilocks_zone.png`     | Phase diagram showing computational sweet spot |
+| `fig_monodromy_histogram.png` | Bimodal phase separation                       |
+| `fig_s_sum_correlation.png`   | Vacuum energy prediction (r = 0.632)           |
+| `fig_tpe_modes.png`           | T-P+E dynamics distribution                    |
 
 ### Expected Output
 
@@ -167,7 +172,7 @@ B6/S123467           | tense        | 0.503 🌟     | -1.00
 B0/S                 | resonant     | 0.908        | +1.00 (Frozen)
 B/S012345678         | tense        | 0.050        | -1.00 (Chaos)
 
-✅ HYPOTHESIS CONFIRMED: 
+✅ HYPOTHESIS CONFIRMED:
    - Class 4 / Computation rules cluster in 0.3 < H < 0.6
    - Both phases (Resonant/Tense) appear in the Goldilocks Zone
 ```
@@ -186,8 +191,11 @@ uv run rulial entropy-flow --rule "B3/S23"
 uv run rulial tpe --rule "B3/S23"
 uv run rulial condensate --rule "B078/S012478"
 
-# Scan the rule space
-uv run python -m rulial.runners.probe_2d_v4 --mode quick --samples 200
+# Scan the rule space (V5 recommended)
+uv run python -m rulial.runners.probe_2d_v5_complete --mode sample --samples 500
+
+# GPU-accelerated scan (requires CUDA)
+uv run python -m rulial.runners.probe_2d_v5_complete --mode sample --samples 500 --gpu
 ```
 
 **Full usage guide:** [`docs/USAGE_GUIDE.md`](docs/USAGE_GUIDE.md)
@@ -280,9 +288,11 @@ src/rulial/
 - [x] T-P+E Framework
 - [x] Vacuum condensate detection
 - [x] V4 Atlas scanner
-- [x] **Sheaf-theoretic framework** ← NEW
-- [x] **Universality proof** ← NEW
-- [x] **Goldilocks zone discovery** ← NEW
+- [x] **Sheaf-theoretic framework**
+- [x] **Universality proof**
+- [x] **Goldilocks zone discovery**
+- [x] **GPU Sheaf Laplacian (CUDA)** ← NEW
+- [x] **Titans + GPU Sheaf integration** ← NEW
 - [ ] Gate hunting (collision logic)
 - [ ] Multi-rule circuit synthesis
 

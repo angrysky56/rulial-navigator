@@ -5,28 +5,28 @@ description = "Autonomous Discovery Engine for Rulial Space"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "numpy>=1.22,<2.4",
-    "numba>=0.63.1",
-    "scipy>=1.17.0",
-    "networkx>=3.2",
-    "tqdm>=4.66.0",
-    "fastapi>=0.109.0",
-    "uvicorn>=0.27.0",
-    "typer>=0.9.0",
-    # V2 / Advanced Dependencies - Commented out for initial build/Py3.13 compat due to not checking for the latest packages.
-    "quimb>=1.12.1",
-    "qiskit>=2.3.0",
-    "qiskit-machine-learning>=0.9.0",
-    "qiskit-quimb>=0.0.9",
-    "pyzx>=0.9.0",
-    "gudhi>=3.9.0",
-    "ripser>=0.6.8",
-    "scikit-learn>=1.4.0",
-    "torch>=2.2.0",
-    "matplotlib>=3.8.0",
-    "pillow>=10.2.0",
-    "llvmlite>=0.46.0",
-    "websockets>=16.0",
+  "numpy>=1.22,<2.4",
+  "numba>=0.63.1",
+  "scipy>=1.17.0",
+  "networkx>=3.2",
+  "tqdm>=4.66.0",
+  "fastapi>=0.109.0",
+  "uvicorn>=0.27.0",
+  "typer>=0.9.0",
+  # V2 / Advanced Dependencies - Commented out for initial build/Py3.13 compat due to not checking for the latest packages.
+  "quimb>=1.12.1",
+  "qiskit>=2.3.0",
+  "qiskit-machine-learning>=0.9.0",
+  "qiskit-quimb>=0.0.9",
+  "pyzx>=0.9.0",
+  "gudhi>=3.9.0",
+  "ripser>=0.6.8",
+  "scikit-learn>=1.4.0",
+  "torch>=2.9.1",
+  "matplotlib>=3.8.0",
+  "pillow>=10.2.0",
+  "llvmlite>=0.46.0",
+  "websockets>=16.0",
 ]
 
 [project.scripts]
@@ -35,6 +35,21 @@ rulial = "rulial.cli:app"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+# 2. Pin torch dependencies to that index
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu130" }]
+torchvision = [{ index = "pytorch-cu130" }]
+
+[tool.uv.extra-build-dependencies]
+torch-sparse = ["torch"]
+torch-scatter = ["torch"]
+torch-geometric = ["torch"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/rulial"]
