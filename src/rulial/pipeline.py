@@ -1,456 +1,351 @@
 """
-Unified Ruliad Pipeline: Integrating All Components.
+Unified Ruliad Pipeline: The Discovery Engine.
 
-This module connects:
-1. Titans (Exploration) → Finds promising rules via test-time learning
-2. Atlas (Mapping) → Records findings and classifications
-3. Mining (Extraction) → Analyzes particles and reactions
-4. Query (Interface) → Answers questions about discovered physics
+Integrates:
+1. Titans (Exploration) - Learned navigation
+2. LLL (Filter) - Combinatorial complexity filter
+3. Sheaf (Physics) - GPU-accelerated cohomology
+4. Atlas (Persistence) - SQLite storage
 
-The pipeline can run in different modes:
-- EXPLORE: Use Titans to actively search for Class 4 rules
-- CATALOG: Batch analyze rules from an existing atlas
-- QUERY: Answer questions about discovered physics
+This pipeline replaces all standalone runners.
 """
 
-import json
 import logging
-from dataclasses import asdict, dataclass
+import time
 from pathlib import Path
-from typing import Dict, List
 
 import numpy as np
 
-from rulial.compression.metrics import TelemetryAnalyzer
 from rulial.engine.totalistic import Totalistic2DEngine
 from rulial.mapper.atlas import Atlas
-from rulial.mapper.topology import TopologyMapper
+from rulial.mapper.fractal import compute_fractal_dimension
+from rulial.mapper.lll_complexity import analyze_rule_combinatorially
+from rulial.mapper.sheaf_gpu import analyze_rule_gpu
 from rulial.mining.collider import Collider
 from rulial.mining.extractor import ParticleMiner
-from rulial.mining.synthesizer import Synthesizer
+from rulial.navigator.compass import CompressionCompass
 from rulial.navigator.titans import TitansNavigator
-from rulial.quantum.bridge import TensorBridge
 
-logger = logging.getLogger(__name__)
-
-
-@dataclass
-class UnifiedResult:
-    """Complete analysis of a rule through the full pipeline."""
-
-    rule_str: str
-    wolfram_class: int
-    compression_ratio: float
-    betti_1: int
-    entanglement_entropy: float
-    particle_count: int
-    spaceship_count: int
-    is_logic_capable: bool
-    available_gadgets: List[str]
-    titans_surprise: float = 0.0
-
-    def as_dict(self) -> dict:
-        return asdict(self)
-
-    def summary(self) -> str:
-        lines = [
-            f"═══ {self.rule_str} ═══",
-            f"  Wolfram Class: {self.wolfram_class}",
-            f"  Compression: {self.compression_ratio:.5f}",
-            f"  Topology: β₁={self.betti_1}",
-            f"  Entanglement: {self.entanglement_entropy:.3f}",
-            f"  Particles: {self.particle_count} ({self.spaceship_count} spaceships)",
-            f"  Logic Capable: {'✅' if self.is_logic_capable else '❌'}",
-            f"  Gadgets: {', '.join(self.available_gadgets) or 'None'}",
-        ]
-        if self.titans_surprise > 0.05:
-            lines.append(f"  ⚡ Titans Surprise: {self.titans_surprise:.3f}")
-        return "\n".join(lines)
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("rulial")
 
 
 class UnifiedPipeline:
-    """
-    The complete Ruliad Navigator pipeline.
+    def __init__(self, db_path: str = "data/atlas_full_v6_gpu.db"):
+        self.db_path = db_path
+        self.atlas = Atlas(db_path)
 
-    Integrates all components for automated discovery and analysis.
-    """
-
-    def __init__(
-        self,
-        atlas_path: str = "atlas_grid.json",
-        catalog_path: str = "ruliad_catalog.json",
-    ):
-        self.atlas_path = Path(atlas_path)
-        self.catalog_path = Path(catalog_path)
-
-        # Initialize components
-        self.analyzer = TelemetryAnalyzer()
-        self.topo_mapper = TopologyMapper()
-
-        # Titans (18-bit for 2D rules: 9 Born + 9 Survive)
+        # Initialize Titans
         self.titans = TitansNavigator(rule_size_bits=18)
+        self.titans_path = Path("data/titans_memory.pt")
 
-        # In-memory atlas and catalog
-        self.atlas = Atlas()
-        self.catalog: Dict[str, UnifiedResult] = {}
+        # AIR Protocol Components
+        self.compass = CompressionCompass()
+        # Miners are instantiated per rule, but we can keep refs if needed
 
-        # Load existing data if available
-        self._load_atlas()
-        self._load_catalog()
+        # Load persistent state if available
+        if self.titans_path.exists():
+            self.titans.load(str(self.titans_path))
 
-        print(
-            f"Pipeline initialized. Atlas: {len(self.atlas.rules)} rules, Catalog: {len(self.catalog)} analyzed."
+        self.known_rules = set()
+
+    def bootstrap_titans(self):
+        """
+        Train Titans on the entire history of the Atlas.
+        This allows the agent to 'wake up' with knowledge of the 36h scan.
+        """
+        print(f"🧠 Bootstrapping Titans from {self.db_path}...")
+
+        # Fetch all rules with harmonic_overlap (our target metric)
+        cursor = self.atlas.conn.execute(
+            "SELECT rule_str, harmonic_overlap FROM explorations WHERE harmonic_overlap IS NOT NULL AND harmonic_overlap != 0"
         )
+        rows = cursor.fetchall()
 
-    def _load_atlas(self):
-        """Load pre-scanned atlas data."""
-        if self.atlas_path.exists():
-            try:
-                with open(self.atlas_path) as f:
-                    data = json.load(f)
-                    for entry in data:
-                        rule_str = entry.get("rule_str", "")
-                        if rule_str:
-                            # Create minimal telemetry for atlas recording
-                            from rulial.compression.metrics import CompressionTelemetry
+        if not rows:
+            print("No training data found in Atlas.")
+            return
 
-                            telemetry = CompressionTelemetry(
-                                rigid_ratio_lzma=entry.get("compression_ratio", 0),
-                                rigid_ratio_gzip=0,
-                                neural_losses=[],
-                                mean_loss=0,
-                                loss_derivative=0,
-                                shannon_entropy=0,
-                            )
-                            self.atlas.record(
-                                rule=hash(rule_str) % 262144,  # 18-bit hash
-                                telemetry=telemetry,
-                                wolfram_class=entry.get("wolfram_class", 0),
-                            )
-                print(f"Loaded {len(data)} rules from atlas.")
-            except Exception as e:
-                logger.debug(f"Could not load atlas: {e}")
+        print(f"Found {len(rows)} training examples.")
 
-    def _load_catalog(self):
-        """Load previously analyzed rules."""
-        if self.catalog_path.exists():
-            try:
-                with open(self.catalog_path) as f:
-                    data = json.load(f)
-                    for entry in data:
-                        rule_str = entry.get("rule_str", "")
-                        if rule_str:
-                            self.catalog[rule_str] = UnifiedResult(**entry)
-                print(f"Loaded {len(self.catalog)} rules from catalog.")
-            except Exception as e:
-                logger.debug(f"Could not load catalog: {e}")
+        # Populate known rules set for fast skipping
+        self.known_rules = set()
 
-    def _save_catalog(self):
-        """Save catalog to disk."""
-        with open(self.catalog_path, "w") as f:
-            data = [r.as_dict() for r in self.catalog.values()]
-            json.dump(data, f, indent=2)
+        vectors = []
+        targets = []
 
-    def _rule_to_vector(self, rule_str: str) -> np.ndarray:
-        """Convert B.../S... string to 18-bit binary vector for Titans."""
-        born_bits = [0] * 9
-        survive_bits = [0] * 9
+        for row in rows:
+            rule_str = row[0]
+            overlap = row[1]
+            vec = self._rule_to_vector(rule_str)
+            vectors.append(vec)
+            targets.append(overlap)
 
-        parts = rule_str.split("/")
-        if len(parts) == 2:
-            for c in parts[0]:
-                if c.isdigit():
-                    born_bits[int(c)] = 1
-            for c in parts[1]:
-                if c.isdigit():
-                    survive_bits[int(c)] = 1
+            # Canonicalize key for cache
+            # This ensures "B3/S23" matches exactly what _vector_to_rule produces
+            canonical_rule = self._vector_to_rule(vec)
+            self.known_rules.add(canonical_rule)
 
-        return np.array(born_bits + survive_bits, dtype=np.float32)
+        vectors = np.array(vectors)
+        targets = np.array(targets)
 
-    def analyze_rule(
-        self, rule_str: str, use_titans: bool = True, deep_mining: bool = True
-    ) -> UnifiedResult:
+        # Train
+        print("Training Titans neural memory...")
+        self.titans.train_batch(vectors, targets, epochs=3)  # Quick epochs
+        self.titans.save(str(self.titans_path))
+        print("✅ Titans bootstrapped and saved.")
+
+    def run_continuously(self, steps: int = 1000000, start_rule: str = "B3/S23"):
         """
-        Full pipeline analysis of a single rule.
-
-        Args:
-            rule_str: The rule to analyze (e.g., "B3/S23")
-            use_titans: Whether to update Titans memory
-            deep_mining: Whether to run full particle mining
+        The Main Loop.
+        1. Hallucinate next rule (Titans)
+        2. LLL Filter (Reject boring)
+        3. Physics (Sheaf + Fractal)
+        4. Learn (Titans update)
+        5. Persist
         """
-        # Check cache first
-        if rule_str in self.catalog:
-            return self.catalog[rule_str]
+        print("🚀 Starting Continuous Exploration Engine")
+        print(f"   Database: {self.db_path}")
+        print("   Titans: Active")
 
-        print(f"Analyzing {rule_str}...")
+        # Start vector
+        current_vec = self._rule_to_vector(start_rule)
 
-        # 1. Simulate with sparse random (good for GoL-like rules)
-        engine = Totalistic2DEngine(rule_str)
-        history = engine.simulate(64, 64, 300, "random", density=0.3)
-        spacetime = np.stack(history, axis=0)
+        # Stats
+        start_time = time.time()
+        scanned = 0
+        goldilocks = 0
 
-        # 2. Compression Metrics
-        flat = spacetime.reshape(spacetime.shape[0], -1)
-        telemetry = self.analyzer.analyze(flat)
-
-        # 3. Topology (TDA)
-        topo = self.topo_mapper.compute_persistence(spacetime)
-        betti_1 = topo.betti_1
-
-        # 4. Classify
-        cr = telemetry.rigid_ratio_lzma
-        if cr < 0.0015:
-            w_class = 1
-        elif cr > 0.01:
-            w_class = 3
-        elif betti_1 > 50:
-            w_class = 4
-        else:
-            w_class = 2
-
-        # 5. Quantum Entanglement (if Class 4 candidate)
-        entropy = 0.0
-        if w_class >= 3:
-            try:
-                bridge = TensorBridge(height=16, width=16)
-                # Sample middle frame
-                mid_frame = history[len(history) // 2][:16, :16]
-                psi = bridge.grid_to_tensor_state(mid_frame)
-                result = bridge.compute_bipartition_entropy(psi)
-                entropy = result.get("entropy", 0.0)
-            except Exception as e:
-                logger.debug(f"TensorBridge failed: {e}")
-
-        # 6. Titans Learning (if enabled)
-        surprise = 0.0
-        if use_titans:
-            rule_vec = self._rule_to_vector(rule_str)
-            # Use normalized entropy as the target
-            target = min(1.0, entropy) if entropy > 0 else cr * 10
-            surprise = self.titans.probe_and_learn(rule_vec, target)
-
-        # 7. Deep Mining (if enabled and Class 4)
-        particle_count = 0
-        spaceship_count = 0
-        is_logic_capable = False
-        gadgets = []
-
-        if deep_mining and w_class == 4:
-            try:
-                miner = ParticleMiner(rule_str)
-                particles = miner.mine(attempts=10, steps=300, density=0.1)
-                particle_count = len(particles)
-                spaceship_count = sum(1 for p in particles if p.is_spaceship)
-
-                if particles:
-                    collider = Collider(rule_str, particles)
-                    table = collider.run_all_experiments()
-                    is_logic_capable = table.is_logic_capable()
-
-                    if is_logic_capable:
-                        particles_dict = {p.name: p for p in particles}
-                        synth = Synthesizer(rule_str, table, particles_dict)
-                        gadget_list = synth.synthesize_all()
-                        gadgets = [g.name for g in gadget_list]
-            except Exception as e:
-                logger.debug(f"Mining failed: {e}")
-
-        # Build result
-        result = UnifiedResult(
-            rule_str=rule_str,
-            wolfram_class=w_class,
-            compression_ratio=cr,
-            betti_1=betti_1,
-            entanglement_entropy=entropy,
-            particle_count=particle_count,
-            spaceship_count=spaceship_count,
-            is_logic_capable=is_logic_capable,
-            available_gadgets=gadgets,
-            titans_surprise=surprise,
-        )
-
-        # Cache
-        self.catalog[rule_str] = result
-
-        return result
-
-    def explore(
-        self, steps: int = 100, start_rule: str = "B3/S23"
-    ) -> List[UnifiedResult]:
-        """
-        Use Titans to actively explore rule space.
-
-        Returns a list of all analyzed rules.
-        """
-        results = []
-        current_rule = start_rule
-        current_vec = self._rule_to_vector(current_rule)
-
-        print(f"Starting Titans exploration from {start_rule}...")
+        consecutive_skips = 0
 
         for step in range(steps):
-            # 1. Analyze current rule
-            result = self.analyze_rule(current_rule, use_titans=True, deep_mining=True)
-            results.append(result)
-            print(f"[{step+1}/{steps}] {result.summary()}\n")
+            # 1. Titans suggests next rule
+            # Hallucinate 20 neighbors, pick best
+            next_vec, predicted_h = self.titans.hallucinate_neighbors(
+                current_vec, num_neighbors=20
+            )
+            rule_str = self._vector_to_rule(next_vec)
 
-            # 2. Titans hallucinates next promising rule
-            next_vec, predicted = self.titans.hallucinate_neighbors(
-                current_vec, num_neighbors=10
+            # 2. LLL Combinatorial Filter
+            # Fast check before simulation
+            try:
+                # SKIP CHECK: If we already know this rule, don't simulate it again.
+                if rule_str in self.known_rules:
+                    consecutive_skips += 1
+
+                    # STUCK DETECTION: If we skip too many, JUMP.
+                    if consecutive_skips > 50:
+                        if consecutive_skips % 50 == 0:
+                            print(
+                                f"\r[{step}] 🌀 STUCK in known space ({consecutive_skips} skips). Teleporting to random rule...",
+                                end="",
+                                flush=True,
+                            )
+
+                        # Generate completely random rule
+                        current_vec = np.random.randint(0, 2, 18).astype(np.float32)
+                        # Or verify it's not known?
+                        while self._vector_to_rule(current_vec) in self.known_rules:
+                            current_vec = np.random.randint(0, 2, 18).astype(np.float32)
+                        continue
+
+                    # Metric for user
+                    sys_print = f"\r[{step}] {rule_str:<18} ♻️  Known In DB. Skipping... (Seq: {consecutive_skips})"
+                    print(sys_print, end="", flush=True)
+                    current_vec = next_vec
+                    continue
+
+                # Reset counter if found new
+                consecutive_skips = 0
+
+                lll = analyze_rule_combinatorially(rule_str)
+                # Keep if p_active is in "Goldilocks Zone" ~[0.15, 0.55]
+                if not (0.15 <= lll.p_active <= 0.55):
+                    # Reject without simulation
+                    current_vec = next_vec
+                    continue
+            except Exception:
+                current_vec = next_vec
+                continue
+
+            # 3. Physics & Sheaf (GPU)
+            try:
+                # GPU Sheaf Analysis
+                sheaf_res = analyze_rule_gpu(
+                    rule_str, grid_size=48, steps=100, device="cuda"
+                )
+
+                # Fractal Dimension
+                engine = Totalistic2DEngine(rule_str)
+                history = engine.simulate(48, 48, 100, "random", density=0.3)
+                final_grid = history[-1]
+                fractal_dim = compute_fractal_dimension(final_grid)
+                equilibrium_density = final_grid.sum() / (48 * 48)
+
+            except Exception:
+                # logger.error(f"Physics error on {rule_str}: {e}")
+                current_vec = next_vec
+                continue
+
+            # 4. Titans Learn
+            # Use Harmonic Overlap as the learning signal
+            surprise = self.titans.probe_and_learn(next_vec, sheaf_res.harmonic_overlap)
+
+            # 5. Mining & Validation (The "Scientific" Phase)
+            # Only mine if Physics or LLL suggests it's worth it
+            particle_count = 0
+            interaction_count = 0
+            avg_mass = 0.0
+            max_vel = 0.0
+            is_logic = False
+            betti_1 = 0  # GPU Sheaf doesn't return betti? It returns h1_dim?
+            # Reviewing sheaf_gpu. analyze_rule_gpu returns a named tuple/dataclass?
+            # It returns SheafAnalysis which has h1_dim.
+            betti_1 = getattr(sheaf_res, "h1_dim", 0)
+
+            # Trigger Mining if:
+            # - Goldilocks (harmonic overlap)
+            # - OR LLL promising
+            # - OR Compass says Interesting (Class 4 Candidate) - WAIT, we didn't run Compass yet!
+
+            # Run Compass on History
+            compass_reading = self.compass.measure(rule_str, history)
+
+            should_mine = (
+                (0.2 <= sheaf_res.harmonic_overlap <= 0.7)
+                or (0.15 <= lll.p_active <= 0.55)
+                or compass_reading.is_interesting
             )
 
-            # Convert back to rule string
-            born_bits = next_vec[:9]
-            survive_bits = next_vec[9:]
-            b_str = "".join(str(i) for i, b in enumerate(born_bits) if b > 0.5)
-            s_str = "".join(str(i) for i, b in enumerate(survive_bits) if b > 0.5)
-            current_rule = f"B{b_str}/S{s_str}"
+            if should_mine:
+                try:
+                    # A. Particles
+                    miner = ParticleMiner(rule_str)
+                    particles = miner.mine(attempts=5, steps=200)  # Quick mine
+                    particle_count = len(particles)
+
+                    if particles:
+                        avg_mass = np.mean([np.sum(p.pattern) for p in particles])
+                        max_vel = max([np.linalg.norm(p.velocity) for p in particles])
+
+                        # B. Collisions
+                        collider = Collider(rule_str)
+                        # Pre-inject found particles to avoid re-mining?
+                        collider.particles = {p.uuid: p for p in particles}
+                        # Run experiments
+                        table = collider.run_all_experiments()
+                        interaction_count = len(table.reactions)
+
+                        # Logic check: Do we have gliders interacting?
+                        # Simple proxy: if we have interactions, we have logic potential
+                        is_logic = interaction_count > 0
+                except Exception as e:
+                    logger.error(f"Mining error on {rule_str}: {e}")
+
+            # 6. Persist
+            is_goldilocks = 0.3 <= sheaf_res.harmonic_overlap <= 0.6
+            w_class = (
+                4
+                if (is_goldilocks or particle_count > 0)
+                else (2 if equilibrium_density > 0.0 else 1)
+            )
+            if equilibrium_density > 0.0 and not is_goldilocks and particle_count == 0:
+                w_class = 3  # Chaos/Periodic generic
+
+            # Simple manual insertion to avoid circular dependency or old Atlas code issues
+            try:
+                # Basic Explorations Table
+                self.atlas.record_from_dict(
+                    {
+                        "rule_str": rule_str,
+                        "wolfram_class": w_class,
+                        "harmonic_overlap": sheaf_res.harmonic_overlap,
+                        "monodromy": sheaf_res.monodromy_index,
+                        "spectral_gap": sheaf_res.spectral_gap,
+                        "sheaf_phase": sheaf_res.sheaf_type,
+                        "equilibrium_density": equilibrium_density,
+                        "fractal_dimension": fractal_dim,
+                        "is_condensate": False,
+                    }
+                )
+
+                # Scientific Metrics Table (AIR)
+                self.atlas.conn.execute(
+                    """
+                    INSERT OR REPLACE INTO scientific_metrics (
+                        rule_str,
+                        compression_ratio_start, compression_ratio_end, compression_progress, logical_depth,
+                        betti_1, lll_score,
+                        particle_count, avg_particle_mass, max_particle_velocity,
+                        interaction_count, is_logic_capable, oligon_density
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        rule_str,
+                        compass_reading.compression_ratio_start,
+                        compass_reading.compression_ratio_end,
+                        compass_reading.compression_progress,
+                        compass_reading.logical_depth_proxy,
+                        betti_1,
+                        lll.lll_score,
+                        particle_count,
+                        avg_mass,
+                        max_vel,
+                        interaction_count,
+                        is_logic,
+                        equilibrium_density,  # Proxy for oligon density if no detailed count
+                    ),
+                )
+
+                # Add to local cache to prevent re-scanning in this session
+                self.known_rules.add(self._vector_to_rule(next_vec))
+
+                # Periodically save weights
+                if step % 50 == 0:
+                    self.titans.save(str(self.titans_path))
+
+            except Exception as e:
+                logger.error(f"DB Error: {e}")
+
+            # Update loop state
             current_vec = next_vec
+            scanned += 1
+            if is_goldilocks:
+                goldilocks += 1
 
-            # Save periodically
-            if (step + 1) % 10 == 0:
-                self._save_catalog()
+            # Console output
+            elapsed = time.time() - start_time
+            rate = scanned / elapsed
 
-        self._save_catalog()
-        return results
+            status_icon = (
+                "🌟" if is_goldilocks else ("🧪" if particle_count > 0 else "•")
+            )
+            print(
+                f"\r[{step}] {rule_str:<18} {status_icon} H={sheaf_res.harmonic_overlap:.2f} S={surprise:.3f} P={particle_count} Rate={rate:.1f}/s {compass_reading.status_msg[:15]}...",
+                end="",
+                flush=True,
+            )
 
-    def catalog_atlas(self, max_rules: int = 50) -> List[UnifiedResult]:
-        """
-        Analyze Class 4 candidates from the atlas.
-        """
-        results = []
+    def _rule_to_vector(self, rule_str: str) -> np.ndarray:
+        """Convert B/S rule string to 18-bit binary vector."""
+        digits = "012345678"
+        vector = np.zeros(18, dtype=np.float32)
+        parts = rule_str.upper().replace(" ", "").split("/")
+        for part in parts:
+            if part.startswith("B"):
+                for i, d in enumerate(digits):
+                    if d in part:
+                        vector[i] = 1.0
+            elif part.startswith("S"):
+                for i, d in enumerate(digits):
+                    if d in part:
+                        vector[9 + i] = 1.0
+        return vector
 
-        # Get Class 4 rules from atlas
-        gold_rules = self.atlas.get_gold_filaments()
-        print(f"Found {len(gold_rules)} Class 4 candidates in atlas.")
-
-        # Also check the JSON directly for rule_str
-        if self.atlas_path.exists():
-            with open(self.atlas_path) as f:
-                data = json.load(f)
-                for entry in data:
-                    if entry.get("wolfram_class", 0) == 4:
-                        rule_str = entry.get("rule_str", "")
-                        if rule_str and rule_str not in self.catalog:
-                            print(f"Analyzing atlas candidate: {rule_str}")
-                            result = self.analyze_rule(
-                                rule_str, use_titans=True, deep_mining=True
-                            )
-                            results.append(result)
-                            print(result.summary())
-                            print()
-
-                            if len(results) >= max_rules:
-                                break
-
-        self._save_catalog()
-        return results
-
-    def query(self, request: str) -> str:
-        """
-        Answer a natural language query about the catalog.
-        """
-        request_lower = request.lower()
-
-        # Parse query type
-        if "logic capable" in request_lower or "compute" in request_lower:
-            matches = [r for r in self.catalog.values() if r.is_logic_capable]
-            if matches:
-                lines = [f"Found {len(matches)} logic-capable rule(s):"]
-                for r in matches[:5]:
-                    lines.append(r.summary())
-                return "\n\n".join(lines)
-            return "No logic-capable rules found in catalog."
-
-        if (
-            "gadget" in request_lower
-            or "wire" in request_lower
-            or "not gate" in request_lower
-        ):
-            gadget_name = None
-            if "wire" in request_lower:
-                gadget_name = "WIRE"
-            elif "eater" in request_lower:
-                gadget_name = "EATER"
-            elif "not" in request_lower:
-                gadget_name = "NOT_GATE_TEMPLATE"
-
-            if gadget_name:
-                matches = [
-                    r
-                    for r in self.catalog.values()
-                    if gadget_name in r.available_gadgets
-                ]
-                if matches:
-                    lines = [f"Found {len(matches)} rule(s) with {gadget_name}:"]
-                    for r in matches[:5]:
-                        lines.append(r.summary())
-                    return "\n\n".join(lines)
-                return f"No rules with {gadget_name} found in catalog."
-
-        if "class 4" in request_lower or "complex" in request_lower:
-            matches = [r for r in self.catalog.values() if r.wolfram_class == 4]
-            if matches:
-                lines = [f"Found {len(matches)} Class 4 rule(s):"]
-                for r in matches[:5]:
-                    lines.append(r.summary())
-                return "\n\n".join(lines)
-            return "No Class 4 rules found in catalog."
-
-        if "analyze" in request_lower:
-            # Extract rule string
-            import re
-
-            match = re.search(r"B\d*/S\d*", request, re.IGNORECASE)
-            if match:
-                rule_str = match.group().upper()
-                result = self.analyze_rule(rule_str)
-                return result.summary()
-
-        return f"Catalog contains {len(self.catalog)} analyzed rules. Try: 'logic capable', 'class 4', 'analyze B3/S23'"
-
-
-def main():
-    """CLI interface for the unified pipeline."""
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Unified Ruliad Pipeline")
-    parser.add_argument(
-        "--mode",
-        choices=["explore", "catalog", "query", "analyze"],
-        default="analyze",
-        help="Operation mode",
-    )
-    parser.add_argument("--rule", type=str, default="B3/S23", help="Rule to analyze")
-    parser.add_argument("--steps", type=int, default=20, help="Exploration steps")
-    parser.add_argument("--query", type=str, default="", help="Query string")
-    args = parser.parse_args()
-
-    pipeline = UnifiedPipeline()
-
-    if args.mode == "explore":
-        results = pipeline.explore(steps=args.steps, start_rule=args.rule)
-        print(f"\n{'='*60}")
-        print(f"Exploration complete. Analyzed {len(results)} rules.")
-        logic_capable = sum(1 for r in results if r.is_logic_capable)
-        print(f"Logic-capable rules found: {logic_capable}")
-
-    elif args.mode == "catalog":
-        results = pipeline.catalog_atlas()
-        print(f"\n{'='*60}")
-        print(f"Cataloging complete. Analyzed {len(results)} Class 4 candidates.")
-
-    elif args.mode == "query":
-        if args.query:
-            result = pipeline.query(args.query)
-            print(result)
-        else:
-            print("Usage: --mode query --query 'your question'")
-
-    else:  # analyze
-        result = pipeline.analyze_rule(args.rule)
-        print(result.summary())
-
-
-if __name__ == "__main__":
-    main()
+    def _vector_to_rule(self, vector: np.ndarray) -> str:
+        """Convert 18-bit binary vector to B/S rule string."""
+        digits = "012345678"
+        b = "".join(digits[i] for i in range(9) if vector[i] > 0.5)
+        s = "".join(digits[i] for i in range(9) if vector[9 + i] > 0.5)
+        return f"B{b}/S{s}"

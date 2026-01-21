@@ -1,486 +1,201 @@
-# Rulial Navigator: Complete Usage Guide
+# Rulial Navigator: The Field Manual
 
-A comprehensive guide for AI agents and code-savvy users.
-
----
-
-## Table of Contents
-
-1. [Installation](#installation)
-2. [CLI Reference](#cli-reference)
-3. [Python API](#python-api)
-4. [Core Concepts](#core-concepts)
-5. [Workflows](#workflows)
-6. [Data Formats](#data-formats)
+**A Guide to Mapping the Computational Universe**
 
 ---
 
-## Installation
+## Part I: Project Context
 
-```bash
-git clone https://github.com/yourusername/rulial-navigator.git
-cd rulial-navigator
-uv sync
-```
+### 1. What is the Ruliad?
+The **Ruliad** is the abstract space of *all possible computational rules*. Imagine a library containing every possible universe's laws of physics. Most of these "books" describe empty universes or chaotic static, but a rare few describe universes rich with structure, logic, and complexity.
 
-**Requirements:** Python 3.11+, CUDA recommended for Titans
+This project, the **Rulial Navigator**, is an autonomous agent designed to explore this infinite library. Its mission is to find the "interesting" books—the rules that support complex structures akin to life and matter.
 
-**Optional dependencies:**
+### 2. The Goal: Finding "Class 4"
+Wolfram classified cellular automata into 4 classes:
+1.  **Class 1**: Dies out (Boring).
+2.  **Class 2**: Periodic/Stable (Boring).
+3.  **Class 3**: Chaotic (Too unpredictable).
+4.  **Class 4**: **Complex** (The "Goldilocks" zone).
 
-- `qiskit` + `qiskit-machine-learning` for quantum kernel
-- `gudhi` for persistent homology
+**Class 4** rules are capable of universal computation. They support "gliders" (particles that move and interact) and stable structures. Our goal is to map the distribution of these Class 4 rules in the Ruliad.
+
+### 3. The Physics of Rule Space
+We use advanced mathematical tools to identify these rules without running them for eternity:
+
+*   **Topological Analysis (Sheaf Theory)**: We measure "Harmonic Overlap" ($H$). Rules with $0.3 \le H \le 0.6$ are in the "Goldilocks Zone"—balanced between order and chaos.
+*   **Cosmological Analysis (Condensates)**: Some rules behave like a "Big Bang," expanding from a single cell to fill space. We call these **Vacuum Condensates**.
+*   **Particle Physics (Oligons)**: Other rules support stable, isolated particles called **Oligons**. These are the building blocks of "matter" in these toy universes.
 
 ---
 
-## CLI Reference
+## Part II: The Unified Pipeline
 
-### Core Commands
+We have consolidated all tools into a single command-line interface: `rulial`.
 
-```bash
-# View all commands
-uv run rulial --help
-```
-
-### Analysis Commands
-
-| Command        | Description                 | Example                                          |
-| -------------- | --------------------------- | ------------------------------------------------ |
-| `entropy-flow` | Compression flow analysis   | `uv run rulial entropy-flow --rule "B3/S23"`     |
-| `tpe`          | T-P+E dynamics analysis     | `uv run rulial tpe --rule "B36/S23"`             |
-| `oligons`      | Count stable structures     | `uv run rulial oligons --rule "B3/S23"`          |
-| `condensate`   | Vacuum condensate detection | `uv run rulial condensate --rule "B078/S012478"` |
-
-### Pipeline Commands
+### 1. Launching the Discovery Engine
+To start the autonomous exploration agent:
 
 ```bash
-# Analyze a single rule (full pipeline)
-uv run rulial pipeline --mode analyze --rule "B3/S23"
-
-# Explore with Titans agent
-uv run rulial pipeline --mode explore --steps 50 --rule "B3/S23"
-
-# Catalog Class 4 rules from atlas
-uv run rulial pipeline --mode catalog
-
-# Natural language query
-uv run rulial pipeline --mode query --query "logic capable"
+uv run rulial explore
 ```
 
-### Atlas Scanning
+**What this does:**
+1.  **Bootstraps Titans**: Loads the Neural Memory (Titans) from your existing database.
+2.  **Continuous Exploration**:
+    *   **Hallucinate**: The AI predicts a new rule vector that might be interesting.
+    *   **Filter**: Quick combinatorial check (LLL) to discard obviously boring rules.
+    *   **Simulate & Analyze**: Runs the rule on GPU to measure its Physics (Sheaf, Fractal).
+    *   **Learn**: Updates the Titans memory based on how "surprising" the result was.
+    *   **Save**: Persists findings to `data/atlas_full_v6_gpu.db`.
+
+**Options:**
+*   `--steps N`: Run for N steps (default: infinite).
+*   `--db PATH`: Use a different database file.
+
+---
+
+## Part III: Analysis Tools
+
+Once you have mapped parts of the Ruliad, you need to understand what you've found.
+
+### 1. Global Status
+See how much of the universe you have mapped and what you have found:
 
 ```bash
-# V5 Scanner (RECOMMENDED - with LLL + Sheaf + Fractal + Titans)
-uv run python -m rulial.runners.probe_2d_v5_complete --mode sample --samples 500
-
-# GPU-accelerated scanning (requires CUDA)
-uv run python -m rulial.runners.probe_2d_v5_complete --mode sample --samples 500 --gpu
-
-# Modes:
-#   sample    - Random sampling with Titans learning
-#   full      - Exhaustive scan of all 262K totalistic rules
-#   titans    - Titans-guided intelligent exploration
-
-# V5 Options:
-#   --samples N      Number of rules to sample (sample mode)
-#   --steps N        Number of exploration steps (titans mode)
-#   --db FILE        SQLite database path (default: atlas_v5.db)
-#   --output FILE    JSON backup file
-#   --gpu            Use GPU-accelerated Sheaf analysis (CUDA)
-#   --workers N      Parallel workers (0 = auto, 1 = sequential)
+uv run rulial analyze stats
 ```
+*   **Goldilocks Count**: Number of complex candidate rules found.
+*   **Coverage**: Total unique rules explored.
 
-#### V5 Discovery Engine Features
-
-| Feature                      | Description                                        |
-| ---------------------------- | -------------------------------------------------- |
-| **LLL Combinatorial Filter** | 150K rules/sec pre-filter using rule combinatorics |
-| **Sheaf Harmonic Overlap**   | Goldilocks zone detection (H=0.3-0.6)              |
-| **GPU Sheaf Analysis**       | CUDA-accelerated Laplacian eigendecomposition      |
-| **Fractal Dimension**        | Box-counting phase classification                  |
-| **Titans Neural Navigator**  | Test-time learning on rule space                   |
-| **SQLite Atlas**             | Persistent database with all metrics               |
-
-#### V5 Examples
+### 2. Finding Candidates
+List the top "Class 4" candidates (highest complexity scores):
 
 ```bash
-# Quick sample with Titans learning
-uv run python -m rulial.runners.probe_2d_v5_complete --mode sample --samples 1000
-
-# GPU-accelerated sample (Titans + GPU Sheaf on same CUDA device)
-uv run python -m rulial.runners.probe_2d_v5_complete --mode sample --samples 500 --gpu
-
-# Full scan with Titans learning (~14 hours for Phase 2)
-uv run python -m rulial.runners.probe_2d_v5_complete --mode full --db atlas_full.db
-
-# Full scan with GPU acceleration (~5 hours)
-uv run python -m rulial.runners.probe_2d_v5_complete --mode full --gpu --db atlas_full_gpu.db
-
-# Titans-guided exploration (intelligent navigation)
-uv run python -m rulial.runners.probe_2d_v5_complete --mode titans --steps 200
-
-# Check database
-sqlite3 atlas_v5.db "SELECT rule_str, harmonic_overlap, fractal_dimension FROM explorations WHERE wolfram_class=4"
+uv run rulial analyze goldilocks --limit 20
 ```
 
-#### Legacy V4 Scanner
+### 3. Deep Dive Inspection
+When you find a specific rule of interest (e.g., `B07/S457`), run a full physics simulation:
 
 ```bash
-# V4 Scanner (simpler, no Titans)
-uv run python -m rulial.runners.probe_2d_v4 --mode quick --samples 200
-
-# V4 Options:
-#   --mode quick|full|region|condensate
-#   --samples N      Number of rules to scan
-#   --output FILE    Output JSON file
+uv run rulial inspect B07/S457
 ```
 
-### Web Observatory
+**Output Explanation:**
+*   **Harmonic Overlap ($H$)**: Complexity score. ~0.5 is ideal.
+*   **Fractal Dimension ($D$)**: Structure complexity. ~1.6 suggests rich texture.
+*   **Cosmological Phase**:
+    *   `VACUUM CONDENSATE`: Expands to fill space (a "Universe").
+    *   `PARTICLE-BASED`: Empty space with distinct objects.
+*   **Particle Zoo (Oligons)**: Counts the number of stable species (Still lifes, Oscillators) this rule supports.
+
+---
+
+## Part IV: Visualization
+
+To see the "Highways of Complexity" in the rule space, we use **Cayley**, a graph database visualization tool.
+
+### 1. Export the Map
+Convert your SQLite atlas into a Graph format (N-Quads):
 
 ```bash
-uv run rulial serve
-# Open http://localhost:8000
+uv run rulial analyze export --output data/rule_space.nq.gz
 ```
 
-## Python API
+### 2. Load in Cayley
+(Assuming you have Cayley installed or running via Docker):
 
-### Quick Start
-
-```python
-from rulial.engine.totalistic import Totalistic2DEngine
-
-# Simulate Game of Life
-engine = Totalistic2DEngine("B3/S23")
-history = engine.simulate(64, 64, 100, "random", density=0.3)
-print(f"Final population: {history[-1].sum()}")
+```bash
+# Example Docker command
+docker run -d -p 64210:64210 \
+  -v $(pwd)/data:/data \
+  cayleygraph/cayley:latest \
+  -c /data/cayley.yml \
+  --load=/data/rule_space.nq.gz
 ```
 
-### Compression Flow Analysis
+Open `http://localhost:64210` in your browser.
 
-```python
-from rulial.compression.flow import CompressionFlowAnalyzer
+### 3. Visual Queries (Gizmo)
+Paste these into the **Visualize** tab to see connections:
 
-analyzer = CompressionFlowAnalyzer()
-result = analyzer.analyze("B36/S23")
-
-print(f"Signal: {result.signal.name}")
-print(f"Wolfram Class: {result.wolfram_class}")
-print(f"Compression Ratio: {result.mean_rigid_ratio:.4f}")
+**Show "Life-Like" Neighbors:**
+```javascript
+g.V("<rule:B3/S23>").Both("<pred:connected_to>").All()
 ```
 
-### T-P+E Framework
-
-```python
-from rulial.mapper.tpe import TPEAnalyzer
-
-tpe = TPEAnalyzer()
-result = tpe.analyze("B3/S23")
-
-print(f"Toroidal (T): {result.toroidal:.3f}")
-print(f"Poloidal (P): {result.poloidal:.3f}")
-print(f"Emergence (E): {result.emergence:.4f}")
-print(f"Mode: {result.dominant_mode}")
-```
-
-### Vacuum Condensate Detection
-
-```python
-from rulial.mapper.condensate import VacuumCondensateAnalyzer
-
-analyzer = VacuumCondensateAnalyzer()
-result = analyzer.analyze("B078/S012478")
-
-print(f"Is Condensate: {result.is_condensate}")
-print(f"Equilibrium Density: {result.equilibrium_density:.1%}")
-print(f"Single Cell → {result.expansion_factor:.0f} cells")
-```
-
-### Oligon Census
-
-```python
-from rulial.mining.oligon import OligonCounter
-
-counter = OligonCounter()
-result = counter.count("B3/S23")
-
-print(f"Still Lifes: {result.still_lifes}")
-print(f"Total Oligons: {result.total_oligons}")
-print(f"Density: {result.density:.2f} per 100 cells")
-```
-
-### Particle Mining
-
-```python
-from rulial.mining.extractor import ParticleMiner
-
-miner = ParticleMiner("B3/S23")
-particles = miner.mine()
-
-for p in particles:
-    print(f"{p.name}: period={p.period}, velocity={p.velocity}")
-```
-
-### Topology (Persistent Homology)
-
-```python
-import numpy as np
-from rulial.mapper.topology import TopologyMapper
-
-mapper = TopologyMapper()
-# Needs spacetime array (T, H, W)
-spacetime = np.stack(history, axis=0)
-result = mapper.compute_persistence(spacetime)
-
-print(f"β₀ (components): {result.betti_0}")
-print(f"β₁ (loops): {result.betti_1}")
-print(f"Persistence entropy: {result.persistence_entropy:.4f}")
-```
-
-### GPU Sheaf Analysis (CUDA)
-
-```python
-from rulial.mapper.sheaf_gpu import (
-    SheafLaplacianGPU,
-    analyze_rule_gpu,
-    batch_analyze_rules_gpu
-)
-
-# Single rule analysis on GPU
-result = analyze_rule_gpu("B3/S23", grid_size=48, steps=100, device='cuda')
-print(f"H = {result.harmonic_overlap:.3f}")
-print(f"Spectral Gap = {result.spectral_gap:.4f}")
-print(f"Type = {result.sheaf_type}")
-
-# Batch analysis (much faster)
-rules = ["B3/S23", "B36/S23", "B0/S8", "B6/S123467"]
-results = batch_analyze_rules_gpu(rules, device='cuda')
-for rule, r in zip(rules, results, strict=False):
-    print(f"{rule}: H={r.harmonic_overlap:.3f}")
-```
-
-### Unified Pipeline
-
-```python
-from rulial.pipeline import UnifiedPipeline
-
-pipe = UnifiedPipeline()
-
-# Analyze single rule
-result = pipe.analyze_rule("B3/S23")
-print(result.summary())
-
-# Natural language query
-response = pipe.query("find logic capable rules")
-print(response)
-```
-
-### Titans Navigation (Online Learning)
-
-```python
-from rulial.navigator.titans import TitansNavigator
-import numpy as np
-
-nav = TitansNavigator(rule_size_bits=18)
-
-# Convert rule to vector
-rule_vec = np.array([0,0,0,1,0,0,0,0,0, 0,0,1,1,0,0,0,0,0], dtype=np.float32)
-
-# Probe and learn
-entropy = 0.5
-surprise = nav.probe_and_learn(rule_vec, entropy)
-
-# Hallucinate promising neighbors
-next_vec, predicted_entropy = nav.hallucinate_neighbors(rule_vec)
+**Show the Goldilocks Highway:**
+```javascript
+// Find connections between complex rules
+g.V().Has("<pred:harmonic_overlap>", gt("0.4")).Tag("source").Both("<pred:connected_to>").Has("<pred:harmonic_overlap>", gt("0.4")).Tag("target").All()
 ```
 
 ---
 
-## Core Concepts
+## Part V: The Turing Machine Corps
+*Mapping the computational paths of Non-Deterministic Machines.*
 
-### Wolfram Classes
+While 2D Cellular Automata explore the **landscape**, Turing Machines explore the **paths**.
+We use Non-Deterministic Turing Machines (NDTMs) to map all possible timelines of a computation.
 
-| Class | Behavior        | Example |
-| ----- | --------------- | ------- |
-| 1     | Dies out        | B/S     |
-| 2     | Periodic/stable | B2/S    |
-| 3     | Chaotic         | B1/S1   |
-| 4     | Complex         | B3/S23  |
-
-### Navigator Signals
-
-| Signal         | Meaning              | Action   |
-| -------------- | -------------------- | -------- |
-| 🔥 FRUSTRATION | High entropy, chaos  | Escape   |
-| ❄️ BOREDOM     | Low entropy, frozen  | Escape   |
-| ✨ CURIOSITY   | Active flow, complex | Approach |
-
-### T-P+E Framework
-
-- **Toroidal (T):** Expansion, divergence, fragmentation
-- **Poloidal (P):** Contraction, convergence, mass formation
-- **Emergence (E):** E = (T·P) × |T-P|
-
-Maximum emergence occurs when T ≈ P ≈ 0.5.
-
-### Phase Classification
-
-| Phase        | Description                  | Signature                   |
-| ------------ | ---------------------------- | --------------------------- |
-| `particle`   | Isolated gliders/oscillators | has_oligons, not condensate |
-| `condensate` | Coherent membrane            | is_condensate               |
-| `hybrid`     | Both properties              | rare                        |
-
----
-
-## Workflows
-
-### 1. Discover Interesting Rules
+### 1. Explore a Rule's Multiway Graph
+Visualize the branching timelines of a Turing Machine rule.
 
 ```bash
-# V5 scan for Class 4 rules (recommended)
-uv run python -m rulial.runners.probe_2d_v5_complete --mode sample --samples 500 --db discovery.db
+# Explore Rule 2507 (Deterministic but active)
+uv run rulial tm-explore --rule-code 2507 --steps 10
 
-# Query results
-sqlite3 discovery.db "SELECT rule_str, harmonic_overlap, fractal_dimension FROM explorations WHERE wolfram_class=4"
-
-# Or use Titans-guided exploration
-uv run python -m rulial.runners.probe_2d_v5_complete --mode titans --steps 100 --db discovery.db
+# Explore Rule 2506 (Simple)
+uv run rulial tm-explore --rule-code 2506
 ```
 
-### 2. Deep Analysis of a Rule
+### 2. Understanding the Output
+- **States**: The non-deterministic states at each time step.
+- **Red Digit**: The current position of the machine's head.
+- **Branching**: As steps increase, the number of parallel states may grow (for NDTMs).
 
-```python
-from rulial.compression.flow import CompressionFlowAnalyzer
-from rulial.mapper.tpe import TPEAnalyzer
-from rulial.mapper.condensate import VacuumCondensateAnalyzer
-from rulial.mining.oligon import OligonCounter
+> [!TIP]
+> This engine supports full Non-Deterministic branching, allowing you to trace the "Actual Paths" of computation across the Rulial Multiway Graph.
 
-rule = "B078/S012478"
 
-# Full analysis
-flow = CompressionFlowAnalyzer().analyze(rule)
-tpe = TPEAnalyzer().analyze(rule)
-cond = VacuumCondensateAnalyzer().analyze(rule)
-olig = OligonCounter().count(rule)
+---
 
-print(flow.summary())
-print(tpe.summary())
-print(cond.summary())
-print(olig.summary())
-```
+## Part VI: Rulial Function Mining
+*Extracting useful algorithms from the infinite rule space.*
 
-### 3. Find Condensate Rules
+Don't just watch the machines—put them to work.
+The **Function Miner** searches the Rulial Multiway Graph to find specific rules and paths that solve a problem you define.
 
+### 1. Define Your Problem
+You provide an **Input** and a Desired **Target**.
+*   Input: `01` (Binary 1)
+*   Target: `11` (binary 3? or just bit flipping?)
+*   Goal: Find a machine that performs this transformation.
+
+### 2. Run the Miner
 ```bash
-# Focus on B0 rules (likely condensates)
-uv run python -m rulial.runners.probe_2d_v4 --mode condensate --samples 200
-
-# Filter results
-cat atlas_v4.json | jq '.[] | select(.is_condensate == true)'
+# Find a rule that transforms "01" into "11" (Bit Flipper)
+# Check the first 200 rules, searching up to 5 steps deep.
+uv run rulial tm-mine --input-tape "01" --target-tape "11" --rule-limit 200 --max-steps 5
 ```
 
-### 4. Query for Specific Properties
-
-```python
-from rulial.mining.query import query_ruliad
-
-# Natural language query
-result = query_ruliad("I need signal transmission and absorption")
-print(result)
+### 3. Interpret Results
+```text
+FOUND 102 SOLUTIONS!
+Rule 1 found in 1 steps.
+Rule 106 found in 3 steps.
 ```
+*   **Fast solutions (1 step)**: Likely simple lookup-table behavior.
+*   **Deep solutions (3+ steps)**: Indicate an algorithmic process (moving head, rewriting).
+
+> [!TIP]
+> This is **Program Synthesis**. You are discovering algorithms that exist naturally in the Ruliad.
 
 ---
 
-## Data Formats
-
-### Atlas V4 JSON
-
-```json
-{
-  "rule_str": "B3/S23",
-  "b_set": "3",
-  "s_set": "23",
-  "x": 8,
-  "y": 12,
-  "compression_ratio": 0.0581,
-  "signal": "CURIOSITY",
-  "toroidal": 0.609,
-  "poloidal": 0.531,
-  "emergence": 0.0251,
-  "tpe_mode": "balanced",
-  "is_condensate": false,
-  "equilibrium_density": 0.039,
-  "expansion_factor": 0,
-  "betti_1": 15,
-  "final_population": 1024,
-  "wolfram_class": 4,
-  "phase": "particle"
-}
-```
-
-### Rule String Format
-
-```
-B{born}/S{survive}
-```
-
-- `B`: Digits 0-8 specifying birth conditions
-- `S`: Digits 0-8 specifying survival conditions
-
-Examples:
-
-- `B3/S23`: Game of Life
-- `B36/S23`: HighLife
-- `B078/S012478`: Condensate example
-
----
-
-## Key Files
-
-| Path                                         | Description                   |
-| -------------------------------------------- | ----------------------------- |
-| `src/rulial/cli.py`                          | CLI entry point               |
-| `src/rulial/pipeline.py`                     | Unified analysis pipeline     |
-| `src/rulial/compression/flow.py`             | Compression flow analyzer     |
-| `src/rulial/mapper/tpe.py`                   | T-P+E framework               |
-| `src/rulial/mapper/condensate.py`            | Vacuum condensate analyzer    |
-| `src/rulial/mapper/sheaf.py`                 | Sheaf harmonic analysis       |
-| `src/rulial/mapper/sheaf_gpu.py`             | GPU Sheaf Laplacian (CUDA)    |
-| `src/rulial/mapper/fractal.py`               | Fractal dimension (V5)        |
-| `src/rulial/mapper/lll_complexity.py`        | LLL combinatorial filter (V5) |
-| `src/rulial/mapper/atlas.py`                 | SQLite Atlas database         |
-| `src/rulial/mining/oligon.py`                | Oligon counter                |
-| `src/rulial/mining/extractor.py`             | Particle miner                |
-| `src/rulial/runners/probe_2d_v5_complete.py` | V5 Discovery Engine           |
-| `src/rulial/runners/probe_2d_v4.py`          | Legacy V4 scanner             |
-| `src/rulial/navigator/titans.py`             | Titans neural navigator       |
-
----
-
-## Theoretical Documentation
-
-| Document                                      | Topic                    |
-| --------------------------------------------- | ------------------------ |
-| `docs/The-Metastable-Superfluid-Membrane.md`  | Core MSM theory          |
-| `docs/Emes-and-the-Glass-Floor.md`            | Speed of light emergence |
-| `docs/Particles-as-Vortex-Knots.md`           | Mass as causal flux      |
-| `docs/Dark-Matter-as-Oligons.md`              | Tension network          |
-| `docs/Vacuum-Condensate-Discovery.md`         | Condensate phases        |
-| `docs/Whitepaper-Vacuum-Condensate-Phases.md` | Research paper           |
-
----
-
-## For AI Agents
-
-### Recommended Analysis Sequence
-
-1. **Quick classification:** `entropy-flow --rule "RULE"`
-2. **Dynamics check:** `tpe --rule "RULE"`
-3. **Phase determination:** `condensate --rule "RULE"`
-4. **Structure inventory:** `oligons --rule "RULE"`
-
-### Key Decision Points
-
-- **is_condensate = True**: Rule forms coherent membrane, no isolated particles
-- **tpe_mode = balanced**: Complex dynamics, likely Class 4
-- **betti_1 > 20**: Rich topological structure
-- **signal = CURIOSITY**: Active information flow
+## Appendix: Key Files
+*   `src/rulial/pipeline.py`: The brain of the autonomous agent.
+*   `src/rulial/navigator/titans.py`: The Neural Memory architecture.
+*   `src/rulial/mapper/sheaf_gpu.py`: The GPU-accelerated Physics engine.
+*   `src/rulial/analytics/analyzer.py`: The Data Analysis engine.

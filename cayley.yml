@@ -1,0 +1,12 @@
+store:
+  backend: memstore
+  options:
+    nosync: true
+
+load:
+  ignore_duplicates: true
+  batch: 10000
+
+http:
+  host: "0.0.0.0:64210"
+  timeout: "30s"

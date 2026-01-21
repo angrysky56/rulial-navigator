@@ -235,7 +235,7 @@ class SheafLaplacianGPU(nn.Module):
             f_gradient = f_normalized - f_harmonic
             gradient_norm = torch.linalg.norm(f_gradient).item()
 
-        except Exception as e:
+        except Exception:  # noqa: BLE001
             # Fallback
             harmonic_overlap = 0.5
             gradient_norm = 0.5
@@ -378,17 +378,12 @@ class SheafConvLayer(nn.Module):
         self.activation = nn.GELU()
 
     def forward(self, x: Tensor, edge_index: Tensor) -> Tensor:
-        """
-        Forward pass of Sheaf convolution.
-
-        Args:
-            x: Node features (n_nodes, in_channels)
-            edge_index: Edge indices (2, n_edges)
-
-        Returns:
-            Updated node features (n_nodes, out_channels)
-        """
-        n_nodes = x.shape[0]
+        # Forward pass of Sheaf convolution.
+        # Args:
+        #     x: Node features (n_nodes, in_channels)
+        #     edge_index: Edge indices (2, n_edges)
+        # Returns:
+        #     Updated node features (n_nodes, out_channels)
 
         # Apply restriction maps
         x_stalk = self.restriction_map(x)  # (n_nodes, stalk_dim)
@@ -479,7 +474,7 @@ def test_gpu_sheaf():
 
     # Test single rule
     result = analyze_rule_gpu("B3/S23", grid_size=32, steps=50, device=device)
-    print(f"\nB3/S23 (Game of Life):")
+    print("\nB3/S23 (Game of Life):")
     print(f"  H = {result.harmonic_overlap:.4f}")
     print(f"  Gradient = {result.gradient_norm:.4f}")
     print(f"  Spectral Gap = {result.spectral_gap:.4f}")
@@ -495,7 +490,7 @@ def test_gpu_sheaf():
     results = batch_analyze_rules_gpu(rules, grid_size=32, steps=50, device=device)
     elapsed = time.time() - start
 
-    for rule, result in zip(rules, results):
+    for rule, result in zip(rules, results, strict=False):
         print(f"  {rule}: H={result.harmonic_overlap:.3f}, type={result.sheaf_type}")
 
     print(f"\nBatch time: {elapsed:.3f}s ({len(rules)/elapsed:.1f} rules/sec)")

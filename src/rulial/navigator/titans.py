@@ -101,21 +101,61 @@ class TitansNavigator:
         self.input_dim = rule_size_bits
         self.device = self.memory.device
 
+    def train_batch(
+        self, rule_vectors: np.ndarray, target_entropies: np.ndarray, epochs: int = 1
+    ):
+        """
+        Train the memory on a batch of historical data (e.g. from Atlas).
+        """
+        self.memory.train()
+
+        # Convert to tensors
+        x = torch.tensor(rule_vectors, dtype=torch.float32).to(self.device)
+        y = (
+            torch.tensor(target_entropies, dtype=torch.float32)
+            .unsqueeze(1)
+            .to(self.device)
+        )
+
+        dataset = torch.utils.data.TensorDataset(x, y)
+        loader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True)
+
+        for _ in range(epochs):
+            total_loss = 0
+            for bx, by in loader:
+                self.memory.optimizer.zero_grad()
+                pred = self.memory(bx)
+                loss = self.memory.loss_fn(pred, by)
+                loss.backward()
+                self.memory.optimizer.step()
+                total_loss += loss.item()
+
+            # if epoch % 10 == 0:
+            #     print(f"Titans Training Epoch {epoch}: Loss {total_loss / len(loader):.5f}")
+
+    def save(self, path: str):
+        """Save memory state to disk."""
+        torch.save(self.memory.state_dict(), path)
+
+    def load(self, path: str):
+        """Load memory state from disk."""
+        try:
+            self.memory.load_state_dict(
+                torch.load(path, map_location=self.device, weights_only=True)
+            )
+            self.memory.eval()
+            print(f"Titans Memory loaded from {path}")
+        except FileNotFoundError:
+            print(f"No existing Titans memory found at {path}. Starting fresh.")
+        except Exception as e:
+            print(f"Error loading Titans memory: {e}")
+
     def probe_and_learn(self, rule_code: np.ndarray, bridge_entropy: float):
         """
         Called after the Physics Engine & Bridge return a result.
         Updates the Titans Memory based on the finding.
         """
         surprise = self.memory.remember(rule_code, bridge_entropy)
-
-        # If surprise was high, this rule is a "Landmark"
-        # We can log this for the UI/User
-        if surprise > 0.1:
-            pass  # Keep UI clean
-            # print(
-            #    f"⚡ TITANS SURPRISE! Learned new complexity feature. Loss: {surprise:.4f}"
-            # )
-
         return surprise
 
     def hallucinate_neighbors(
@@ -131,8 +171,6 @@ class TitansNavigator:
         # Generate random bit-flip neighbors
         neighbors = []
         vectors = []
-
-        # Always include the current rule? No, we want to move.
 
         for _ in range(num_neighbors):
             n_rule = current_rule.copy()

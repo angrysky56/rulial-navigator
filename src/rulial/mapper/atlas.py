@@ -80,6 +80,28 @@ class Atlas:
             )
         """
         )
+
+        # Scientific Metrics (AIR Protocol)
+        self.conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS scientific_metrics (
+                rule_str TEXT PRIMARY KEY,
+                compression_ratio_start FLOAT,
+                compression_ratio_end FLOAT,
+                compression_progress FLOAT,
+                logical_depth FLOAT,
+                betti_1 INTEGER,
+                lll_score FLOAT,
+                particle_count INTEGER,
+                avg_particle_mass FLOAT,
+                max_particle_velocity FLOAT,
+                interaction_count INTEGER,
+                is_logic_capable BOOLEAN,
+                oligon_density FLOAT,
+                FOREIGN KEY(rule_str) REFERENCES explorations(rule_str)
+            )
+            """
+        )
         self.conn.commit()
 
     def record(

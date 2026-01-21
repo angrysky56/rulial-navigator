@@ -1,312 +1,334 @@
-import time
-
 import typer
 from rich.console import Console
-from rich.table import Table
-
-from .compression.metrics import TelemetryAnalyzer
-from .engine.eca import ECAEngine
-from .navigator.classifier import RuleClassifier
-from .navigator.gradient import GradientCalculator, ProbeResult
-from .navigator.swarm import SwarmNavigator
-from .server.rpc import start_server
 
 app = typer.Typer()
 console = Console()
 
 
 @app.command()
-def serve(port: int = 8000):
-    """Start the RPC backend server."""
-    start_server(port)
-
-
-@app.command()
-def probe(rule: int, steps: int = 500):
-    """Analyze a single rule."""
-    console.print(f"[bold cyan]Probing Rule {rule}...[/bold cyan]")
-
-    # Simulate
-    engine = ECAEngine(rule)
-    st = engine.simulate(200, steps, "random")
-
-    # V1 Analysis
-    analyzer = TelemetryAnalyzer()
-    tel = analyzer.analyze(st)
-    w_class = RuleClassifier.classify(tel)
-
-    # V2 Analysis
-    # Superfluid Filter (Quimb)
-    from .quantum.superfluid import SuperfluidFilter
-
-    sf_filter = SuperfluidFilter()
-    sf_data = sf_filter.analyze(st)
-
-    # ZX Reducer (PyZX)
-    # Extract graph first
-    from .engine.spacetime import SpacetimeUtil
-    from .quantum.zx_reducer import ZXReducer
-
-    causal_graph = SpacetimeUtil.extract_causal_graph(st)
-    zx_reducer = ZXReducer()
-    zx_data = zx_reducer.analyze(causal_graph)
-
-    # Display
-    table = Table(title=f"Analysis of Rule {rule} (V1 + V2)")
-    table.add_column("Metric", style="magenta")
-    table.add_column("Value", style="green")
-
-    # V1 Section
-    table.add_row("Wolfram Class", str(w_class))
-    table.add_row("Rigid Ratio", f"{tel.rigid_ratio_lzma:.4f}")
-    table.add_row("Entropy", f"{tel.shannon_entropy:.4f}")
-    table.add_row("Learning Slope", f"{tel.loss_derivative:.6f}")
-
-    # V2 Section
-    table.add_section()
-    table.add_row("[bold]Quantum V2[/bold]", "")
-    table.add_row("Superfluid Ent.", f"{sf_data.get('normalized_entropy', 0):.4f}")
-    table.add_row("SF Class", str(sf_data.get("classification", "N/A")))
-    table.add_row("ZX Reduction", f"{zx_data.get('reduction_ratio', 0):.4f}")
-    table.add_row("Logical Core", str(zx_data.get("skeleton_structure", "N/A")))
-
-    console.print(table)
-
-    if w_class == 4:
-        console.print("[bold gold1]GOLD FILAMENT DETECTED![/bold gold1]")
-    elif w_class == 3:
-        console.print("[bold red]Chaos detected.[/bold red]")
-    else:
-        console.print("[bold blue]Frozen/Periodic.[/bold blue]")
-
-
-@app.command()
-def navigate(start_rule: int = 110, steps: int = 20):
-    """Start an autonomous navigation session."""
-    current_rule = start_rule
-    swarm = SwarmNavigator()
-    gradient = GradientCalculator()
-
-    console.print(
-        f"[bold green]Starting Navigation Swarm at Rule {current_rule}[/bold green]"
-    )
-
-    for i in range(steps):
-        console.print(f"\n[bold]Step {i+1}/{steps}: Center {current_rule}[/bold]")
-
-        # 1. Spawn Swarm
-        neighbors = swarm.hamming_neighbors(current_rule)
-        probes = []
-
-        # 2. Probe Neighbors
-        with console.status("[bold green]Swarm Probing...[/bold green]"):
-            for r in neighbors:
-                # Run lightweight simulation
-                engine = ECAEngine(r)
-                st = engine.simulate(200, 300, "random")
-                analyzer = TelemetryAnalyzer()
-                tel = analyzer.analyze(st)
-
-                # Determine interestingness
-                score = gradient.compute_interestingness(tel)
-                w_class = RuleClassifier.classify(tel)
-
-                probes.append(ProbeResult(r, tel, w_class, score))
-
-        # 3. Calculate Gradient
-        best_rule, magnitude = gradient.calculate_gradient(current_rule, probes)
-
-        # Display Swarm Status
-        table = Table(show_header=True, header_style="bold magenta")
-        table.add_column("Rule")
-        table.add_column("Class")
-        table.add_column("Interest")
-        table.add_column("Compression")
-
-        for p in probes:
-            style = "white"
-            if p.rule == best_rule:
-                style = "bold green"
-            if p.wolfram_class == 4:
-                style = "bold gold1"
-
-            table.add_row(
-                str(p.rule),
-                str(p.wolfram_class),
-                f"{p.interestingness:.4f}",
-                f"{p.telemetry.rigid_ratio_lzma:.2f}",
-                style=style,
-            )
-
-        console.print(table)
-
-        if best_rule == current_rule:
-            console.print("[yellow]Local optimum reached. Swarm staying put.[/yellow]")
-        else:
-            console.print(
-                f"[cyan]Gradient found! Moving to Rule {best_rule} (Mag: {magnitude:.4f})[/cyan]"
-            )
-        if best_rule == current_rule:
-            console.print("[yellow]Local optimum reached. Swarm staying put.[/yellow]")
-        else:
-            console.print(
-                f"[cyan]Gradient found! Moving to Rule {best_rule} (Mag: {magnitude:.4f})[/cyan]"
-            )
-            current_rule = best_rule
-
-        time.sleep(1)
-
-
-@app.command()
-def probe_2d(
-    width: int = typer.Option(64, help="Grid width"),
-    height: int = typer.Option(64, help="Grid height"),
-    steps: int = typer.Option(100, help="Simulation steps per epoch"),
-    seed: int = typer.Option(
-        224,
-        help="Initial Rule Code (Default: Game of Life 224/std is actually complex mapping, try simple ints)",
-    ),
-    epochs: int = typer.Option(1000, help="Max epochs to run"),
-    window: int = typer.Option(
-        12,
-        help="Observer Window Size (Quantum Analysis). Warning: Complexity scales exponentially.",
-    ),
+def explore(
+    db: str = typer.Option("data/atlas_full_v6_gpu.db", help="Path to Atlas DB"),
+    steps: int = typer.Option(1000000, help="Number of steps to explore"),
+    start_rule: str = typer.Option("B3/S23", help="Starting rule"),
 ):
     """
-    Launch the Rulial Titans autonomous agent in 2D Rule Space.
-    """
-    # Import locally to avoid circular imports or heavy load
-    from rulial.runners.probe_2d import RulialProbe2D
-
-    typer.echo(f"Initializing Titans... Target: 2D Totalistic Space. Seed Rule: {seed}")
-    runner = RulialProbe2D(
-        width=width, height=height, steps=steps, seed_rule=seed, obs_window=window
-    )
-    runner.run_loop(max_epochs=epochs)
-
-
-@app.command()
-def pipeline(
-    mode: str = typer.Option("analyze", help="Mode: explore, catalog, analyze, query"),
-    rule: str = typer.Option("B3/S23", help="Rule to analyze"),
-    steps: int = typer.Option(20, help="Exploration steps"),
-    query: str = typer.Option("", help="Query string for query mode"),
-):
-    """
-    Unified Ruliad Pipeline: Titans + Atlas + Mining + Query.
+    Start the Discovery Engine (Titans Only).
     """
     from rulial.pipeline import UnifiedPipeline
 
-    pipe = UnifiedPipeline()
+    console.print(
+        "[bold green]Initializing Unified Pipeline (Mode: Explorer)...[/bold green]"
+    )
+    pipe = UnifiedPipeline(db_path=db)
 
-    if mode == "explore":
-        console.print(
-            f"[bold cyan]Starting Titans exploration from {rule}...[/bold cyan]"
-        )
-        results = pipe.explore(steps=steps, start_rule=rule)
-        console.print(
-            f"\n[green]Exploration complete. Analyzed {len(results)} rules.[/green]"
-        )
-        logic_capable = sum(1 for r in results if r.is_logic_capable)
-        console.print(f"[gold1]Logic-capable rules found: {logic_capable}[/gold1]")
+    console.print(f"[bold cyan]Bootstrapping Titans from {db}...[/bold cyan]")
+    pipe.bootstrap_titans()
 
-    elif mode == "catalog":
-        console.print("[bold cyan]Cataloging Class 4 rules from atlas...[/bold cyan]")
-        results = pipe.catalog_atlas()
+    console.print("[bold green]Starting Exploration Loop...[/bold green]")
+    try:
+        pipe.run_continuously(steps=steps, start_rule=start_rule)
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Exploration paused.[/yellow]")
+        if hasattr(pipe, "titans_path") and pipe.titans_path:
+            pipe.titans.save(str(pipe.titans_path))
+
+
+@app.command()
+def science(
+    db: str = typer.Option("data/atlas_full_v6_gpu.db", help="Path to Atlas DB"),
+    steps: int = typer.Option(1000000, help="Number of steps to explore"),
+    start_rule: str = typer.Option("B3/S23", help="Starting rule"),
+):
+    """
+    Start the AIR Protocol (Advanced Scientific Mining).
+
+    1. Titans Navigation
+    2. Compression Compass
+    3. Sheaf/Fractal Physics
+    4. Active Mining (Particles, Colliders)
+    """
+    from rulial.pipeline import UnifiedPipeline
+
+    console.print(
+        "[bold green]Initializing Unified Pipeline (Mode: AIR Protocol)...[/bold green]"
+    )
+    pipe = UnifiedPipeline(db_path=db)
+
+    # Ensure bootstrap
+    pipe.bootstrap_titans()
+
+    console.print("[bold purple]Starting Scientific Discovery Loop...[/bold purple]")
+    console.print("   [dim]Targeting: Gliders, Vortex Knots, Logic Gates[/dim]")
+
+    try:
+        pipe.run_continuously(steps=steps, start_rule=start_rule)
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Science paused.[/yellow]")
+        if hasattr(pipe, "titans_path") and pipe.titans_path:
+            pipe.titans.save(str(pipe.titans_path))
+
+
+@app.command(name="goal-search")
+def goal_search(
+    goal_type: str = typer.Option(
+        "goldilocks", help="Search type: goldilocks, condensate, particle"
+    ),
+    limit: int = typer.Option(20, help="Max results"),
+    db: str = typer.Option("data/atlas_full_v6_gpu.db", help="Path to Atlas DB"),
+):
+    """
+    Search the Atlas for rules matching specific goals.
+    """
+    from rulial.navigator.goal_search import GoalDirectedSearch
+
+    searcher = GoalDirectedSearch(db_path=db)
+
+    if goal_type == "goldilocks":
+        results = searcher.find_goldilocks(limit)
+    elif goal_type == "condensate":
+        results = searcher.find_condensates(limit)
+    elif goal_type == "particle":
+        results = searcher.find_particles(limit)
+    else:
+        console.print(f"[red]Unknown goal type: {goal_type}[/red]")
+        return
+
+    console.print(
+        f"[bold cyan]Found {len(results)} candidates for '{goal_type}':[/bold cyan]"
+    )
+    for r in results[:10]:
         console.print(
-            f"\n[green]Cataloging complete. Analyzed {len(results)} rules.[/green]"
+            f"  {r['rule_str']}: H={r['harmonic_overlap']:.3f}, Phase={r.get('phase', 'N/A')}"
         )
 
-    elif mode == "query":
-        if query:
-            console.print(f"[bold cyan]Query: {query}[/bold cyan]")
-            result = pipe.query(query)
-            console.print(result)
-        else:
+
+# Analysis Sub-Commands
+analyze_app = typer.Typer(help="Analyze the mapped Ruliad.")
+app.add_typer(analyze_app, name="analyze")
+
+
+@analyze_app.command("stats")
+def analyze_stats(
+    db: str = typer.Option("data/atlas_full_v6_gpu.db", help="Path to Atlas DB")
+):
+    """Show global statistics of the mapped Ruliad."""
+    from rulial.analytics.analyzer import RuliadAnalyzer
+
+    analyzer = RuliadAnalyzer(db)
+    stats = analyzer.get_global_stats()
+
+    console.print("[bold]Ruliad Mapping Status[/bold]")
+    console.print(f" Total Rules Scanned:  [cyan]{stats.total_scanned:,}[/cyan]")
+    console.print(
+        f" Goldilocks (H~0.5):   [yellow]{stats.goldilocks_count:,}[/yellow] ({(stats.goldilocks_count/stats.total_scanned)*100:.1f}%)"
+    )
+    console.print(
+        f" Class 4 Candidates:   [magenta]{stats.class_4_candidates:,}[/magenta]"
+    )
+    console.print(f" Average Entropy:      {stats.avg_entropy:.4f}")
+
+
+@analyze_app.command("goldilocks")
+def analyze_goldilocks(
+    db: str = typer.Option("data/atlas_full_v6_gpu.db", help="Path to Atlas DB"),
+    limit: int = typer.Option(20, help="Number of rules to show"),
+):
+    """List out top 'Goldilocks' rules with high complexity."""
+    from rich.table import Table
+
+    from rulial.analytics.analyzer import RuliadAnalyzer
+
+    analyzer = RuliadAnalyzer(db)
+    rules = analyzer.find_goldilocks_rules(limit)
+
+    table = Table(title=f"Top {limit} Goldilocks Candidates")
+    table.add_column("Rule", style="cyan")
+    table.add_column("Harmonic Overlap", justify="right")
+    table.add_column("Fractal Dim", justify="right")
+    table.add_column("Class", justify="right")
+
+    for r in rules:
+        table.add_row(
+            r["rule_str"],
+            f"{r['harmonic_overlap']:.4f}",
+            f"{r['fractal_dimension']:.4f}",
+            str(r["wolfram_class"]),
+        )
+
+    console.print(table)
+
+
+@analyze_app.command("export")
+def analyze_export(
+    output: str = typer.Option("data/rule_space.nq.gz", help="Output path for N-Quads"),
+    db: str = typer.Option("data/atlas_full_v6_gpu.db", help="Path to Atlas DB"),
+):
+    """Export the graph connectivity to N-Quads for visualization."""
+    from rulial.analytics.analyzer import RuliadAnalyzer
+
+    analyzer = RuliadAnalyzer(db)
+    analyzer.export_cayley_nquads(output)
+    console.print(f"[green]Exported graph to {output}[/green]")
+
+
+@app.command()
+def inspect(
+    rule: str = typer.Argument(..., help="Rule string to analyze (e.g. B3/S23)"),
+    db: str = typer.Option("data/atlas_full_v6_gpu.db", help="Path to Atlas DB"),
+):
+    """Analyze a single rule using the full V5 stack (Sheaf, Fractal, Condensate, Oligon)."""
+    from rulial.engine.totalistic import Totalistic2DEngine
+    from rulial.mapper.condensate import analyze_condensate
+    from rulial.mapper.fractal import compute_fractal_dimension
+    from rulial.mapper.sheaf_gpu import analyze_rule_gpu
+    from rulial.mining.oligon import count_oligons
+
+    console.print(f"[bold cyan]Analyzing {rule} with FULL PHYSICS SUITE...[/bold cyan]")
+
+    # 1. Physics & Sheaf
+    try:
+        console.print("\n[bold]1. Topological Analysis (Sheaf)[/bold]")
+        sheaf_res = analyze_rule_gpu(rule, grid_size=48, steps=100, device="cuda")
+
+        console.print(f" Harmonic Overlap: {sheaf_res.harmonic_overlap:.4f}")
+        console.print(f" Monodromy Index:  {sheaf_res.monodromy_index:.4f}")
+        console.print(f" Spectral Gap:     {sheaf_res.spectral_gap:.4f}")
+
+        if 0.3 <= sheaf_res.harmonic_overlap <= 0.6:
             console.print(
-                "[yellow]Usage: pipeline --mode query --query 'your question'[/yellow]"
+                "[bold gold1]🌟 GOLDILOCKS CANDIDATE (Topologically Complex)[/bold gold1]"
             )
 
-    else:  # analyze
-        console.print(f"[bold cyan]Analyzing {rule}...[/bold cyan]")
-        result = pipe.analyze_rule(rule)
-        console.print(result.summary())
+    except Exception as e:
+        console.print(f"[red]Sheaf analysis failed: {e}[/red]")
+
+    # 2. Fractal
+    try:
+        engine = Totalistic2DEngine(rule)
+        h = engine.simulate(48, 48, 100, "random")
+        dim = compute_fractal_dimension(h[-1])
+        console.print(f" Fractal Dim:      {dim:.4f}")
+    except Exception as e:
+        console.print(f"[red]Fractal analysis failed: {e}[/red]")
+
+    # 3. Vacuum Condensate (Cosmology)
+    try:
+        console.print("\n[bold]2. Cosmological Analysis (Vacuum)[/bold]")
+        condensate = analyze_condensate(rule)
+        if condensate.is_condensate:
+            console.print(" Phase:            [cyan]🌊 VACUUM CONDENSATE[/cyan]")
+            console.print(f" Equilibrium:      {condensate.equilibrium_density:.1%}")
+            console.print(f" Expansion Factor: {condensate.expansion_factor:.0f}x")
+        else:
+            console.print(" Phase:            [green]⚛️ PARTICLE-BASED[/green]")
+    except Exception as e:
+        console.print(f"[red]Condensate analysis failed: {e}[/red]")
+
+    # 4. Oligons (Particle Physics)
+    try:
+        console.print("\n[bold]3. Particle Analysis (Oligons)[/bold]")
+        oligons = count_oligons(rule)
+        console.print(f" Total Oligons:    {oligons.total_oligons}")
+        console.print(f" Still Lifes (P1): {oligons.still_lifes}")
+        console.print(f" Oscillators (P2): {oligons.oscillators_p2}")
+        console.print(f" Oscillators (P3+):{oligons.oscillators_p3_plus}")
+        console.print(f" Unique Species:   {oligons.unique_patterns}")
+
+        if oligons.unique_patterns > 5 and oligons.oscillators_p3_plus > 0:
+            console.print("[bold gold1]🧪 RICH PARTICLE ZOO DETECTED[/bold gold1]")
+
+    except Exception as e:
+        console.print(f"[red]Oligon analysis failed: {e}[/red]")
+
+
+@app.command(name="tm-explore")
+def tm_explore(
+    rule_code: int = typer.Option(..., help="Wolfram code for the TM (e.g. 2506)"),
+    steps: int = typer.Option(10, help="Steps to evolve"),
+    initial_tape: str = typer.Option("0", help="Initial tape state (e.g. '010')"),
+):
+    """Explore the Multiway Graph of a Non-Deterministic Turing Machine."""
+    from rulial.engine.turing import MultiwayTuringSystem, TMState, TuringMachineRule
+
+    # 1. Setup Rule
+    rule = TuringMachineRule.from_wolfram_code(rule_code)
+    system = MultiwayTuringSystem(rule)
+
+    # 2. Setup Initial State
+    # Parse generic tape string "010" -> tuple, head at 0?
+    # Let's assume head at index 0.
+    tape_vals = tuple(int(c) for c in initial_tape)
+    initial_state = TMState(tape=tape_vals, head_pos=0, state=0)
+
+    # 3. Evolve
+    history = system.evolve(initial_state, steps)
+
+    # 4. Display
+    console.print(f"[bold]Multiway Evolution of TM Rule {rule_code}[/bold]")
+    for t, states in history.items():
+        console.print(f"Step {t}: {len(states)} states")
+        if len(states) < 10:
+            for s in states:
+                # Visualization logic
+                tape_str = ""
+                if not s.tape:
+                    # Empty tape means all zeros. Show head on 0.
+                    tape_str = "[bold red]0[/bold red]"
+                else:
+                    for i, cell in enumerate(s.tape):
+                        if i == s.head_pos:
+                            tape_str += f"[bold red]{cell}[/bold red]"
+                        else:
+                            tape_str += str(cell)
+                console.print(f"  State {s.state}: {tape_str}")
+        else:
+            console.print("  (Too many to list)")
+
+
+@app.command(name="tm-mine")
+def tm_mine(
+    input_tape: str = typer.Option(..., help="Input string (e.g. '010')"),
+    target_tape: str = typer.Option(..., help="Target string (e.g. '01010')"),
+    max_steps: int = typer.Option(10, help="Max steps to search"),
+    rule_limit: int = typer.Option(
+        100, help="Number of rules to check (starts from 0)"
+    ),
+):
+    """
+    Mine for a rule that transforms Input -> Target.
+    Example: Find a doubler (01 -> 011).
+    """
+    from rulial.engine.turing import FunctionMiner
+
+    # Parse inputs
+    i_tuple = tuple(int(c) for c in input_tape)
+    t_tuple = tuple(int(c) for c in target_tape)
+
+    console.print(
+        f"[bold cyan]Mining for Function:[/bold cyan] {input_tape} -> {target_tape}"
+    )
+    console.print(f"Scanning first {rule_limit} rules...")
+
+    miner = FunctionMiner()
+    solutions = miner.mine(
+        i_tuple, t_tuple, max_steps=max_steps, rule_range=range(rule_limit)
+    )
+
+    if solutions:
+        console.print(f"[bold green]FOUND {len(solutions)} SOLUTIONS![/bold green]")
+        for sol in solutions:
+            console.print(
+                f"Rule [bold]{sol['rule']}[/bold] found in {sol['steps']} steps."
+            )
+            # Show path summary?
+    else:
+        console.print("[yellow]No solutions found in search range.[/yellow]")
 
 
 @app.command()
-def entropy_flow(
-    rule: str = typer.Option("B3/S23", help="Rule to analyze"),
-):
-    """
-    Analyze compression flow for a rule (Maxwell's Demon for complexity).
-
-    Uses bifurcated architecture:
-    - Layer 1: Rigid (LZMA) for exact patterns
-    - Layer 2: Neural for soft patterns
-
-    Outputs: FRUSTRATION (chaos), BOREDOM (frozen), or CURIOSITY (complexity)
-    """
-    from rulial.compression.flow import CompressionFlowAnalyzer
-
-    console.print(f"[bold cyan]Analyzing compression flow for {rule}...[/bold cyan]")
-    analyzer = CompressionFlowAnalyzer()
-    result = analyzer.analyze(rule)
-    console.print(result.summary())
-
-
-@app.command()
-def tpe(
-    rule: str = typer.Option("B3/S23", help="Rule to analyze"),
-):
-    """
-    T-P+E Analysis: Toroidal-Poloidal Emergence.
-
-    Measures expansion (T) vs contraction (P) dialectic.
-    E = (T·P) × |T-P| is maximized at balanced dynamics.
-    """
-    from rulial.mapper.tpe import TPEAnalyzer
-
-    console.print(f"[bold cyan]T-P+E analysis for {rule}...[/bold cyan]")
-    analyzer = TPEAnalyzer()
-    result = analyzer.analyze(rule)
-    console.print(result.summary())
-
-
-@app.command()
-def oligons(
-    rule: str = typer.Option("B3/S23", help="Rule to analyze"),
-):
-    """
-    Count oligons (small stable structures).
-
-    Oligons are the "dark matter scaffolding" of the Ruliad:
-    - Still lifes (period 1)
-    - Oscillators (period 2-4)
-    """
-    from rulial.mining.oligon import OligonCounter
-
-    console.print(f"[bold cyan]Counting oligons for {rule}...[/bold cyan]")
-    counter = OligonCounter()
-    result = counter.count(rule)
-    console.print(result.summary())
-
-
-@app.command()
-def condensate(
-    rule: str = typer.Option("B078/S012478", help="Rule to analyze"),
-):
-    """
-    Vacuum Condensate Analysis.
-
-    Detects rules where single cells spontaneously expand
-    to fill the membrane at a characteristic equilibrium density.
-    """
-    from rulial.mapper.condensate import VacuumCondensateAnalyzer
-
-    console.print(f"[bold cyan]Vacuum condensate analysis for {rule}...[/bold cyan]")
-    analyzer = VacuumCondensateAnalyzer()
-    result = analyzer.analyze(rule)
-    console.print(result.summary())
+def query(q: str):
+    """Natural language query of the Ruliad."""
+    console.print(f"Querying: {q}")
 
 
 if __name__ == "__main__":
